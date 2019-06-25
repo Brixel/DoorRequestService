@@ -6,10 +6,9 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MainComponent } from './main.component';
-import { DashboardComponent } from './modules/dashboard/dashboard/dashboard.component';
 import { JwtModule, JwtHelperService } from '@auth0/angular-jwt';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthService } from './modules/core/services/auth.service';
+import { UserService } from './modules/core/services/user.service';
 import { AuthGuard } from './modules/core/services/auth.guard';
 import { AuthInterceptor } from './modules/core/services/auth-interceptor';
 import { ClientConfigurationService } from './modules/core/services/clientconfiguration.service';
@@ -49,7 +48,7 @@ export function tokenGetter():string {
        useClass: AuthInterceptor,
        multi: true,
     },
-    AuthService,
+    UserService,
     BrowserAnimationsModule,],
   bootstrap: [AppComponent]
 })

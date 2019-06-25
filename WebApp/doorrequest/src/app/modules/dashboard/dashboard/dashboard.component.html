@@ -1,1 +1,18 @@
 <p>Hello world</p>
+<div *ngIf="setupImage">
+  <h1>Setup QR Code</h1>
+  <img [src]="setupImage" />
+  <div *ngIf="form">
+    <form novalidate [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field>
+        <input
+          matInput
+          formControlName="validationKey"
+          class="form-control"
+          placeholder="Code"
+        />
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" (click)="submit()">Validate</button>
+    </form>
+  </div>
+</div>

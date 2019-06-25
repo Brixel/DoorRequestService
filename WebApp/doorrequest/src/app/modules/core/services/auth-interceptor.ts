@@ -7,20 +7,20 @@ import {
    HttpEvent,
 } from '@angular/common/http';
 
-import { AuthService } from './auth.service';
+import { UserService } from './user.service';
 
 import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-   constructor(private authService: AuthService) {}
+   constructor(private userService: UserService) {}
 
    intercept(
       req: HttpRequest<any>,
       next: HttpHandler
    ): Observable<HttpEvent<any>> {
-      if (this.authService.isAuthenticated()) {
-         const accessToken = JSON.parse(this.authService.getToken())
+      if (this.userService.isAuthenticated()) {
+         const accessToken = JSON.parse(this.userService.getToken())
             .access_token;
          const token = `Bearer ${accessToken}`;
          const authReq = req.clone({

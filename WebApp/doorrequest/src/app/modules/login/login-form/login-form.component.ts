@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-login-form',
@@ -12,7 +12,7 @@ export class LoginFormComponent implements OnInit {
   form: FormGroup;
   private returnUrl: string;
    constructor(
-      private authService: AuthService,
+      private userService: UserService,
       private router: Router,
       private activated: ActivatedRoute
    ) {}
@@ -33,7 +33,7 @@ export class LoginFormComponent implements OnInit {
   submit() {
     const username = this.form.get('username').value;
     const password = this.form.get('password').value;
-    this.authService.authenticate(username, password).subscribe(
+    this.userService.authenticate(username, password).subscribe(
        () => {
           const url = this.returnUrl || '/';
           this.router.navigate([url]);

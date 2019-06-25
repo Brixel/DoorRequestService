@@ -1,4 +1,6 @@
-﻿using DoorRequest.API.Config;
+﻿using AspNetCore.Totp;
+using AspNetCore.Totp.Interface;
+using DoorRequest.API.Config;
 using IdentityServer.LdapExtension.Extensions;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer4.AccessTokenValidation;
@@ -58,6 +60,11 @@ namespace DoorRequest.API
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
+
+            services.AddScoped<ITotpGenerator, TotpGenerator>();
+            services.AddScoped<ITotpSetupGenerator, TotpSetupGenerator>();
+            services.AddScoped<ITotpValidator, TotpValidator>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
