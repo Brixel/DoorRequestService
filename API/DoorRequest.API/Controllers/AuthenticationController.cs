@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.DTOs;
+using DoorRequest.API.Services;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,7 @@ namespace DoorRequest.API.Controllers
     [Authorize]
     public class AuthenticationController : ControllerBase
     {
-        private readonly string UniqueKey = "UniqueKey";
+
         private readonly ITotpSetupGenerator _totpSetupGenerator;
         private readonly ITotpGenerator _totpGenerator;
         private readonly ITotpValidator _totpValidator;
@@ -31,7 +32,7 @@ namespace DoorRequest.API.Controllers
         [HttpGet("qr")]
         public QRCodeDTO GetQRCode()
         {
-            var image = _totpGenerator.Generate(UniqueKey);
+            var image = _totpGenerator.Generate(AuthenticationService.UniqueKey);
             return new QRCodeDTO()
             {
                 Image = "bla"
@@ -43,7 +44,7 @@ namespace DoorRequest.API.Controllers
         public SetupQRCodeDTO Setup()
         {
             var user = User.GetSubjectId();
-            var setup = _totpSetupGenerator.Generate("DoorRequestService", user, UniqueKey);
+            var setup = _totpSetupGenerator.Generate("DoorRequestService", user, AuthenticationService.UniqueKey);
 
             return new SetupQRCodeDTO()
             {
@@ -55,7 +56,7 @@ namespace DoorRequest.API.Controllers
         [HttpPost("validate")]
         public ValidatateSetupDTO Validate([FromBody]int validationCode)
         {
-            var validationResult = _totpValidator.Validate(UniqueKey, validationCode);
+            var validationResult = _totpValidator.Validate(AuthenticationService.UniqueKey, validationCode);
             return new ValidatateSetupDTO()
             { 
                 IsSuccess = validationResult

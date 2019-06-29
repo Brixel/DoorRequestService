@@ -1,6 +1,7 @@
 ﻿using AspNetCore.Totp;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
+using DoorRequest.API.Services;
 using IdentityServer.LdapExtension.Extensions;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer4.AccessTokenValidation;
@@ -60,10 +61,19 @@ namespace DoorRequest.API
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
-
+;
+            var doorConfiguration = Configuration.GetSection("DoorConfiguration").Get<DoorConfiguration>();
             services.AddScoped<ITotpGenerator, TotpGenerator>();
             services.AddScoped<ITotpSetupGenerator, TotpSetupGenerator>();
             services.AddScoped<ITotpValidator, TotpValidator>();
+            services.AddScoped<IBrixelOpenDoorClient>(x =>
+                new BrixelOpenDoorClient(
+                    doorConfiguration.MQTTClientId, 
+                    doorConfiguration.MQTTUsername, 
+                    doorConfiguration.MQTTPassword, 
+                    doorConfiguration.MQTTServer,
+                    doorConfiguration.MQTTTopic));
+            services.AddScoped<IDoorRequestService, DoorRequestService>();
 
         }
 
@@ -72,13 +82,14 @@ namespace DoorRequest.API
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
             }
             else
             {
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
 
             app.UseHttpsRedirection();
 
@@ -96,5 +107,14 @@ namespace DoorRequest.API
                     template: "{controller}/{action=GetAboutVersion}/{id?}");
             });
         }
+    }
+
+    public class DoorConfiguration
+    {
+        public string MQTTClientId { get; set; }
+        public string MQTTUsername { get; set; }
+        public string MQTTPassword { get; set; }
+        public string MQTTServer { get; set; }
+        public string MQTTTopic { get; set; }
     }
 }

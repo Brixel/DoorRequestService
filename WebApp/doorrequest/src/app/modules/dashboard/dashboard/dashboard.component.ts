@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ApiService } from '../../core/services/api.service';
-import { AuthService } from '../../core/services/auth.service';
+import { MatDialog } from '@angular/material';
 import { FormGroup, FormControl } from '@angular/forms';
+import { DoorService } from '../../core/services/door.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,33 +10,25 @@ import { FormGroup, FormControl } from '@angular/forms';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  manualKey: string;
   setupImage: string;
-
   form: FormGroup;
-
   constructor(
-    private apiService: ApiService,
-    private authService: AuthService
+    private doorService: DoorService,
+    private authService: AuthService,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit() {
+
     this.form = new FormGroup({
       validationKey: new FormControl('XXXXXX')
     });
-    console.log(this.form);
-    this.apiService.get('api/values').subscribe(res => {
-      console.log(res);
-    });
-    this.authService.getQRCode().subscribe(res => console.log(res));
 
-    this.authService.setupQRCode().subscribe(res => {
+    this.authService.setupQRCode().subscribe((res) => {
       this.setupImage = res.image;
-      this.manualKey = res.manualSetupKey;
-      console.log(this.setupImage);
     });
-  }
 
+  }
   submit() {
     if(this.form.valid){
 
@@ -44,10 +36,7 @@ export class DashboardComponent implements OnInit {
       console.log(validationKey.value);
       const validationNumber = Number(validationKey.value);
       if (!isNaN(validationNumber)) {
-        console.log(validationNumber);
-        this.authService
-          .validateSetupCode(validationNumber)
-          .subscribe(res => console.log(res));
+        this.doorService.openDoorRequest(validationNumber).subscribe((res) => console.log(res));
       }
     }
   }

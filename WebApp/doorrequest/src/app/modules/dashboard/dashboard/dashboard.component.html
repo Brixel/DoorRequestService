@@ -1,19 +1,35 @@
-<p>Hello world</p>
-<div *ngIf="setupImage">
-  <h1>Setup QR Code</h1>
-  <img [src]="setupImage" />
-  <div *ngIf="form">
+
+<div>
+  <mat-card>
+    <mat-card-title>Open de deur</mat-card-title>
+    <mat-card-content>
     <form novalidate [formGroup]="form" (ngSubmit)="submit()">
-      <mat-form-field>
-        <input
-          matInput
-          formControlName="validationKey"
-          class="form-control"
-          type="number"
-          placeholder="Code"
-        />
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit" (click)="submit()">Validate</button>
-    </form>
+        <mat-form-field>
+          <input
+            matInput
+            formControlName="validationKey"
+            class="form-control"
+            type="number"
+            placeholder="Code"
+          />
+        </mat-form-field>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+        >
+          Open de deur
+        </button>
+      </form>
+    </mat-card-content>
+    </mat-card>
+      <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Setup Authenticator app</mat-panel-title>
+              <mat-panel-description>Setup two factor authentication</mat-panel-description>
+            </mat-expansion-panel-header>
+            <img [src]="setupImage"
+          /></mat-expansion-panel>
+          </mat-accordion>
   </div>
-</div>
