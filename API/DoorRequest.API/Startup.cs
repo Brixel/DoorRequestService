@@ -52,7 +52,7 @@ namespace DoorRequest.API
                 .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                 .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
                 .AddInMemoryClients(InMemoryInitConfig.GetClients())
-                .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("MyConfigurationSection"), UserStore.InMemory);
+                .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("LDAPConnection"), UserStore.InMemory);
 
             services.AddCors(options =>
             {
@@ -62,7 +62,7 @@ namespace DoorRequest.API
                         .AllowAnyHeader());
             });
 ;
-            var doorConfiguration = Configuration.GetSection("DoorConfiguration").Get<DoorConfiguration>();
+            var doorConfiguration = Configuration.GetSection("MQTTDoorConfiguration").Get<DoorConfiguration>();
             services.AddScoped<ITotpGenerator, TotpGenerator>();
             services.AddScoped<ITotpSetupGenerator, TotpSetupGenerator>();
             services.AddScoped<ITotpValidator, TotpValidator>();
