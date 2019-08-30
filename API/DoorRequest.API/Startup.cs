@@ -1,10 +1,12 @@
-﻿using AspNetCore.Totp;
+﻿using System.Collections.Generic;
+using AspNetCore.Totp;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
 using IdentityServer.LdapExtension.Extensions;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Test;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -32,11 +34,11 @@ namespace DoorRequest.API
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(options =>
                 {
-
+                    options.RequireHttpsMetadata = false;
                     // The API resource scope issued in authorization server
                     options.ApiName = "space-auth.api";
                     // URL of my authorization server
-                    options.Authority = "https://localhost:5001";
+                    options.Authority = "http://192.168.20.100:5001";
                 });
 
             // Making JWT authentication scheme the default
@@ -52,7 +54,17 @@ namespace DoorRequest.API
                 .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                 .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
                 .AddInMemoryClients(InMemoryInitConfig.GetClients())
-                .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("LDAPConnection"), UserStore.InMemory);
+                .AddTestUsers(new List<TestUser>()
+                {
+                    new TestUser()
+                    {
+                        Username = "Testuser1",
+                        Password = "Password123",
+                        SubjectId = "Testuser1",
+
+                    }
+                });
+                //.AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("LDAPConnection"), UserStore.InMemory);
 
             services.AddCors(options =>
             {

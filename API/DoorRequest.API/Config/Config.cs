@@ -56,7 +56,11 @@ namespace DoorRequest.API.Config
                         new Secret("secret".Sha256())
                     },
                     AllowedScopes = { "space-auth.api" },
-                    AllowedCorsOrigins = new List<string>(){"http://localhost:4200"}
+                    AllowedCorsOrigins = new List<string>()
+                    {
+                        "http://localhost:4200",
+                        "http://192.168.20.100:81"
+                    }
                 },
 
                 // OpenID Connect implicit flow client (MVC)
