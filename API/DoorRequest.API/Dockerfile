@@ -5,10 +5,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src
-COPY ["API/DoorRequest.API/DoorRequest.API.csproj", "API/DoorRequest.API/"]
-RUN dotnet restore "API/DoorRequest.API/DoorRequest.API.csproj"
+COPY ["DoorRequest.API.csproj","."]
+RUN dotnet restore "DoorRequest.API.csproj"
 COPY . .
-WORKDIR "/src/API/DoorRequest.API"
 RUN dotnet build "DoorRequest.API.csproj" -c Release -o /app/build
 
 FROM build AS publish
