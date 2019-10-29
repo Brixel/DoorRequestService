@@ -7,9 +7,9 @@ COPY package.json package-lock.json ./
 
 ## Storing node modules on a separate layer will prevent unnecessary npm installs at each build
 
-RUN npm ci && mkdir /ng-app && mv ./node_modules ./ng-app
+RUN npm ci && mkdir /app && mv ./node_modules ./app
 
-WORKDIR /ng-app
+WORKDIR /app
 
 COPY . .
 
@@ -17,6 +17,9 @@ COPY . .
 
 RUN npm run ng build -- --prod --output-path=dist
 
+RUN apk add dos2unix --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community/ --allow-untrusted
+RUN dos2unix /app/entrypoint.sh
+RUN ["chmod", "+x", "/app/entrypoint.sh"]
 
 ### STAGE 2: Setup ###
 
@@ -29,6 +32,8 @@ COPY nginx.default.conf /etc/nginx/conf.d/
 RUN rm -rf /usr/share/nginx/html/*
 
 ## From ‘builder’ stage copy over the artifacts in dist folder to default nginx public folder
-COPY --from=builder /ng-app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/entrypoint.sh entrypoint.sh
+RUN ["./entrypoint.sh"]
 
 CMD ["nginx", "-g", "daemon off;"]
