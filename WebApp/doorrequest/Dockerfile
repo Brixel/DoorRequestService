@@ -17,8 +17,6 @@ COPY . .
 
 RUN npm run ng build -- --prod --output-path=dist
 
-RUN apk add dos2unix --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community/ --allow-untrusted
-RUN dos2unix /app/entrypoint.sh
 RUN ["chmod", "+x", "/app/entrypoint.sh"]
 
 ### STAGE 2: Setup ###
