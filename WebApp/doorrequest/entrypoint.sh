@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ -z "$APIURL" ]
 then
     echo "No APIURL found, aborting..."
