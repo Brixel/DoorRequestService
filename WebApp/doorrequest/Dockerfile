@@ -32,6 +32,6 @@ RUN rm -rf /usr/share/nginx/html/*
 ## From ‘builder’ stage copy over the artifacts in dist folder to default nginx public folder
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY --from=builder /app/entrypoint.sh entrypoint.sh
-RUN ["./entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["nginx", "-g", "daemon off;"]
