@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Totp" Version="2.3.0" />
-    <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.8" />
+    <PackageReference Include="IdentityServer4" Version="2.5.3" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
@@ -18,6 +18,9 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="MQTTnet" Version="3.0.5" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="3.0.5" />
+    <PackageReference Include="Novell.Directory.Ldap.NETStandard2_0" Version="3.1.0" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="jlgkcxgvknbm v,nmzl ,mznoo534oi5powsjddmg;dms" /></VisualStudio></ProjectExtensions>
 
 </Project>

@@ -16,8 +16,9 @@ COPY . .
 ## Build the angular app in production mode and store the artifacts in dist folder
 
 RUN npm run ng build -- --prod --output-path=dist
-
-RUN ["chmod", "+x", "/app/entrypoint.sh"]
+RUN apk add dos2unix --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community/ --allow-untrusted
+RUN dos2unix entrypoint.sh
+RUN ["chmod", "+x", "entrypoint.sh"]
 
 ### STAGE 2: Setup ###
 
@@ -32,6 +33,5 @@ RUN rm -rf /usr/share/nginx/html/*
 ## From ‘builder’ stage copy over the artifacts in dist folder to default nginx public folder
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY --from=builder /app/entrypoint.sh entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["./entrypoint.sh"]

@@ -50,7 +50,6 @@ namespace DoorRequest.API.Config
                 {
                     ClientId = "space-auth-client",
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-
                     ClientSecrets =
                     {
                         new Secret("secret".Sha256())

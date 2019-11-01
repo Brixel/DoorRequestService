@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
 using AspNetCore.Totp;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
-using IdentityServer.LdapExtension.Extensions;
-using IdentityServer.LdapExtension.UserModel;
 using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Configuration;
 using IdentityServer4.Test;
+using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -30,15 +33,16 @@ namespace DoorRequest.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
+            var identityConfiguration = 
+                Configuration.GetSection("IdentityConfiguration").Get<IdentityConfiguration>();
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(options =>
                 {
                     options.RequireHttpsMetadata = false;
                     // The API resource scope issued in authorization server
-                    options.ApiName = "space-auth.api";
+                    options.ApiName = identityConfiguration.ApiName;
                     // URL of my authorization server
-                    options.Authority = "http://192.168.20.100:5001";
+                    options.Authority = identityConfiguration.Authority;
                 });
 
             // Making JWT authentication scheme the default
@@ -48,23 +52,33 @@ namespace DoorRequest.API
                     .RequireAuthenticatedUser()
                     .Build();
             });
-            services.AddIdentityServer()
+            var ldapConfig
+                = Configuration.GetSection("LDAPConnection");
+            services.AddIdentityServer(options =>
+                {
+                    options.Events.RaiseErrorEvents = true;
+                    options.Events.RaiseFailureEvents = true;
+                    options.Events.RaiseInformationEvents = true;
+                    options.Events.RaiseSuccessEvents = true;;
+                })
                 .AddDeveloperSigningCredential()
                 //.AddSigningCredential(...)
                 .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                 .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
                 .AddInMemoryClients(InMemoryInitConfig.GetClients())
-                .AddTestUsers(new List<TestUser>()
-                {
-                    new TestUser()
-                    {
-                        Username = "Testuser1",
-                        Password = "Password123",
-                        SubjectId = "Testuser1",
+                .AddProfileService<LDAPProfileService>()
+                .AddResourceOwnerValidator<LDAPResourceOwnerPasswordValidator>();
+                //.AddTestUsers(new List<TestUser>()
+                //{
+                //    new TestUser()
+                //    {
+                //        Username = "Testuser1",
+                //        Password = "Password123",
+                //        SubjectId = "Testuser1",
 
-                    }
-                });
-                //.AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("LDAPConnection"), UserStore.InMemory);
+                //    }
+                //})
+                //.AddLdapUsers<OpenLdapAppUser>(ldapConfig, UserStore.InMemory);
 
             services.AddCors(options =>
             {
@@ -102,8 +116,8 @@ namespace DoorRequest.API
                 app.UseHsts();
             }
 
-
-            app.UseHttpsRedirection();
+            // TODO Uncomment once connection to LDAP is over SSL
+            //app.UseHttpsRedirection();
 
             app.UseAuthentication();
 
@@ -121,6 +135,14 @@ namespace DoorRequest.API
         }
     }
 
+    public class LDAPTokenRequestValidator : ICustomTokenRequestValidator
+    {
+        public Task ValidateAsync(CustomTokenRequestValidationContext context)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
     public class DoorConfiguration
     {
         public string MQTTClientId { get; set; }
@@ -128,5 +150,12 @@ namespace DoorRequest.API
         public string MQTTPassword { get; set; }
         public string MQTTServer { get; set; }
         public string MQTTTopic { get; set; }
+    }
+
+
+    public class IdentityConfiguration
+    {
+        public string Authority { get;set; }
+        public string ApiName { get; set; }
     }
 }
