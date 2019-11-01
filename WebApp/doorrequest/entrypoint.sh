@@ -7,7 +7,7 @@ else
     echo "APIURL found: $APIURL"
 fi
 
-echo "{ \"apiURL\": \"$APIURL\" }"  > ./usr/share/nginx/html/assets/config.json
+echo "{ \"apiUri\": \"$APIURL\",\"authUri\": \"$APIURL\" }"  > ./usr/share/nginx/html/assets/config.json
 
 echo "Starting nginx..."
 nginx -g "daemon off;"
