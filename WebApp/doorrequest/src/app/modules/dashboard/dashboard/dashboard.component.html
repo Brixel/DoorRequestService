@@ -29,7 +29,7 @@
               <mat-panel-title>Setup Authenticator app</mat-panel-title>
               <mat-panel-description>Setup two factor authentication</mat-panel-description>
             </mat-expansion-panel-header>
-            <img [src]="setupImage"
+            <img *ngIf="setupImage" [src]="setupImage"
           /></mat-expansion-panel>
           </mat-accordion>
   </div>

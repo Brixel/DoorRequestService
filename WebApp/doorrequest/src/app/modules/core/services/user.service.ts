@@ -44,7 +44,12 @@ export class UserService {
       .pipe(
         map(jwt => {
           if (jwt && jwt.access_token) {
-            localStorage.setItem('token', JSON.stringify(jwt));
+            const token = {
+              access_token: jwt.access_token,
+              expires_in: jwt.expires_in,
+              token_type: jwt.token_type
+            };
+            localStorage.setItem('token', JSON.stringify(token));
           }
         })
       );
