@@ -35,6 +35,6 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY --from=builder /app/entrypoint.sh entrypoint.sh
 
 ## Copy our default nginx config
-COPY --from=builder /app/nginx.default.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/nginx.default.conf /etc/nginx/conf.d/default.conf
 
 CMD ["./entrypoint.sh"]
