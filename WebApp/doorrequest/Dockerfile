@@ -34,4 +34,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY --from=builder /app/entrypoint.sh entrypoint.sh
 
+## Copy our default nginx config
+COPY --from=builder nginx.default.conf /etc/nginx/nginx.conf
+
 CMD ["./entrypoint.sh"]
