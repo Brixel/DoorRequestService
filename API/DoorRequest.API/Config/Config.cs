@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using IdentityServer4.Models;
 
 namespace DoorRequest.API.Config
@@ -24,7 +25,7 @@ namespace DoorRequest.API.Config
         }
 
         // clients want to access resources (aka scopes)
-        public static IEnumerable<Client> GetClients(List<string> allowedOrigins)
+        public static IEnumerable<Client> GetClients(IReadOnlyList<string> allowedOrigins)
         {
             // client credentials client
             return new List<Client>
@@ -39,7 +40,7 @@ namespace DoorRequest.API.Config
                         new Secret("secret".Sha256())
                     },
                     AllowedScopes = { "space-auth.api" },
-                    AllowedCorsOrigins = allowedOrigins
+                    AllowedCorsOrigins = allowedOrigins.ToList()
                 }
             };
         }

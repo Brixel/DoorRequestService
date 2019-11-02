@@ -63,7 +63,7 @@ namespace DoorRequest.API
                 //.AddSigningCredential(...)
                 .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                 .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
-                .AddInMemoryClients(InMemoryInitConfig.GetClients())
+                .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
                 .AddProfileService<LDAPProfileService>()
                 .AddResourceOwnerValidator<LDAPResourceOwnerPasswordValidator>();
                 //.AddTestUsers(new List<TestUser>()
