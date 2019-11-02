@@ -25,7 +25,7 @@ RUN ["chmod", "+x", "entrypoint.sh"]
 FROM nginx:alpine
 
 ## Copy our default nginx config
-COPY nginx.default.conf /etc/nginx/conf.d/
+COPY nginx.default.conf /etc/nginx/nginx.conf
 
 ## Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*
