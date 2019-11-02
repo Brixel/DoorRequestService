@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using IdentityServer4;
+﻿using System.Collections.Generic;
 using IdentityServer4.Models;
 
 namespace DoorRequest.API.Config
@@ -28,23 +24,11 @@ namespace DoorRequest.API.Config
         }
 
         // clients want to access resources (aka scopes)
-        public static IEnumerable<Client> GetClients()
+        public static IEnumerable<Client> GetClients(List<string> allowedOrigins)
         {
             // client credentials client
             return new List<Client>
             {
-                new Client
-                {
-                    ClientId = "client",
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-                    AllowedScopes = { "api1" }
-                },
-
                 // resource owner password grant client
                 new Client
                 {
@@ -55,60 +39,7 @@ namespace DoorRequest.API.Config
                         new Secret("secret".Sha256())
                     },
                     AllowedScopes = { "space-auth.api" },
-                    AllowedCorsOrigins = new List<string>()
-                    {
-                        "http://localhost:4200",
-                        "http://192.168.20.100:81"
-                    }
-                },
-
-                // OpenID Connect implicit flow client (MVC)
-                new Client
-                {
-
-                    ClientId = "mvc",
-                    ClientName = "MVC Client",
-                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
-
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
-                    RedirectUris = { "http://localhost:5002/signin-oidc" },
-                    PostLogoutRedirectUris = { "http://localhost:5002/signout-callback-oidc" },
-
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        "api1"
-                    },
-                    AllowOfflineAccess = true
-                },
-
-                // OpenID Connect implicit flow client (MVC with vue js)
-                new Client
-                {
-                    ClientId = "mvcvue",
-                    ClientName = "MVC VueJS Client",
-                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
-
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-
-                    RedirectUris = { "http://localhost:5006/signin-oidc" },
-                    PostLogoutRedirectUris = { "http://localhost:5006/signout-callback-oidc" },
-
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        "api1"
-                    },
-                    AllowOfflineAccess = true
+                    AllowedCorsOrigins = allowedOrigins
                 }
             };
         }

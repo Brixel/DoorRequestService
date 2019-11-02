@@ -52,8 +52,6 @@ namespace DoorRequest.API
                     .RequireAuthenticatedUser()
                     .Build();
             });
-            var ldapConfig
-                = Configuration.GetSection("LDAPConnection");
             services.AddIdentityServer(options =>
                 {
                     options.Events.RaiseErrorEvents = true;
@@ -135,15 +133,6 @@ namespace DoorRequest.API
         }
     }
 
-    public class LDAPTokenRequestValidator : ICustomTokenRequestValidator
-    {
-        public Task ValidateAsync(CustomTokenRequestValidationContext context)
-        {
-
-            throw new System.NotImplementedException();
-        }
-    }
-
     public class DoorConfiguration
     {
         public string MQTTClientId { get; set; }
@@ -158,5 +147,7 @@ namespace DoorRequest.API
     {
         public string Authority { get;set; }
         public string ApiName { get; set; }
+
+        public IReadOnlyList<string> AllowedOrigins { get; set; }
     }
 }
