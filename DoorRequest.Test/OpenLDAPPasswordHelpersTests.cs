@@ -3,7 +3,7 @@ using System.Text;
 using DoorRequest.API;
 using NUnit.Framework;
 
-namespace DoorRequest.Test
+namespace DoorRequest.Tests
 {
     public class OpenLDAPPasswordHelpersTests
     {

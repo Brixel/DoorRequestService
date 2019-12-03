@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoorRequest.API", "API\Door
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoorRequest.LDAPConnectionTester", "LDAPConnectionTester\DoorRequest.LDAPConnectionTester.csproj", "{6EC729CD-DD16-426E-9015-F36C7C182EFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoorRequest.Test", "DoorRequest.Test\DoorRequest.Test.csproj", "{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoorRequest.Tests", "DoorRequest.Test\DoorRequest.Tests.csproj", "{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
