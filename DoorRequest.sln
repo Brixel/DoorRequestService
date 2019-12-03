@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoorRequest.API", "API\DoorRequest.API\DoorRequest.API.csproj", "{263FC65F-673F-42AF-BBDC-7D194BCF58AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoorRequest.LDAPConnectionTester", "LDAPConnectionTester\DoorRequest.LDAPConnectionTester.csproj", "{6EC729CD-DD16-426E-9015-F36C7C182EFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoorRequest.LDAPConnectionTester", "LDAPConnectionTester\DoorRequest.LDAPConnectionTester.csproj", "{6EC729CD-DD16-426E-9015-F36C7C182EFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoorRequest.Test", "DoorRequest.Test\DoorRequest.Test.csproj", "{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6EC729CD-DD16-426E-9015-F36C7C182EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EC729CD-DD16-426E-9015-F36C7C182EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EC729CD-DD16-426E-9015-F36C7C182EFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8D6CE17-CAB6-47BF-AE2B-2B7191C09F56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
