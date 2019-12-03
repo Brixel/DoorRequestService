@@ -18,7 +18,7 @@ namespace DoorRequest.Tests
             var base64Decode =
                 Convert.FromBase64String("e1NTSEF9NWJoRWJtK0s0S05xb0piZUZvSnVybHZSQmtBOXJuVlV4YlVYQUE9PQ==");
             var base64DecodedString = Encoding.UTF8.GetString(base64Decode);
-            OpenLDAPPasswordHelpers.Compare("TestUser", base64DecodedString);
+            OpenLDAPPasswordHelpers.Compare("TestUserA", base64DecodedString);
         }
 
 
