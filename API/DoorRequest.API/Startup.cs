@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using AspNetCore.Totp;
@@ -60,23 +59,11 @@ namespace DoorRequest.API
                     options.Events.RaiseSuccessEvents = true;;
                 })
                 .AddDeveloperSigningCredential()
-                //.AddSigningCredential(...)
                 .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                 .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
                 .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
                 .AddProfileService<LDAPProfileService>()
                 .AddResourceOwnerValidator<LDAPResourceOwnerPasswordValidator>();
-                //.AddTestUsers(new List<TestUser>()
-                //{
-                //    new TestUser()
-                //    {
-                //        Username = "Testuser1",
-                //        Password = "Password123",
-                //        SubjectId = "Testuser1",
-
-                //    }
-                //})
-                //.AddLdapUsers<OpenLdapAppUser>(ldapConfig, UserStore.InMemory);
 
             services.AddCors(options =>
             {
@@ -106,7 +93,7 @@ namespace DoorRequest.API
         {
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
@@ -131,23 +118,5 @@ namespace DoorRequest.API
                     template: "{controller}/{action=GetAboutVersion}/{id?}");
             });
         }
-    }
-
-    public class DoorConfiguration
-    {
-        public string MQTTClientId { get; set; }
-        public string MQTTUsername { get; set; }
-        public string MQTTPassword { get; set; }
-        public string MQTTServer { get; set; }
-        public string MQTTTopic { get; set; }
-    }
-
-
-    public class IdentityConfiguration
-    {
-        public string Authority { get;set; }
-        public string ApiName { get; set; }
-
-        public IReadOnlyList<string> AllowedOrigins { get; set; }
     }
 }
