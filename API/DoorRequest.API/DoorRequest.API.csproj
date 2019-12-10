@@ -19,6 +19,7 @@
     <PackageReference Include="MQTTnet" Version="3.0.5" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="3.0.5" />
     <PackageReference Include="Novell.Directory.Ldap.NETStandard2_0" Version="3.1.0" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="4.6.0" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="jlgkcxgvknbm v,nmzl ,mznoo534oi5powsjddmg;dms" /></VisualStudio></ProjectExtensions>
