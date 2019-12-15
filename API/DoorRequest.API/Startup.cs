@@ -83,7 +83,8 @@ namespace DoorRequest.API
                     doorConfiguration.MQTTServer,
                     doorConfiguration.MQTTTopic));
             services.AddScoped<IDoorRequestService, DoorRequestService>();
-
+            services.Configure<AccountKeyConfiguration>(Configuration.GetSection("AccountKeyConfiguration"));
+            services.AddScoped<IAccountKeyService, AccountKeyService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
