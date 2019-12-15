@@ -8,10 +8,6 @@ import { QRCode, SetupQRCode, ValidationSetupResult } from '../model/authenticat
 export class AuthService {
   constructor(private authProxy: AuthProxy) {}
 
-  getQRCode(): Observable<QRCode> {
-    return this.authProxy.getQRCode().pipe(map((res) => new QRCode(res.image)));
-  }
-
   setupQRCode(): Observable<SetupQRCode> {
     return this.authProxy.setupQRCode().pipe(map((res) => new SetupQRCode(res.manualSetupKey, res.image)));
   }

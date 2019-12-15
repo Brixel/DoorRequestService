@@ -1,5 +1,4 @@
-
-.form-container{
+.form-container {
   display: flex;
   flex-direction: column;
   width: 400px;
@@ -7,24 +6,23 @@
   margin: auto;
   vertical-align: middle;
   justify-content: center;
-
 }
-.form-container .form{
+.form-container .form {
   display: flex;
   flex-direction: column;
 }
-.form-container .form-input{
+.form-container .form-input {
   display: flex;
   flex-direction: column;
 }
-.form-container  .action{
+.form-container .action {
   display: flex;
   justify-content: space-between;
   flex-flow: row-reverse;
-  margin:4px;
+  margin: 4px;
   align-items: center;
 }
-.form-container .action .text-danger{
+.form-container .action .text-danger {
   width: 250px;
   color: #e4594d;
 }

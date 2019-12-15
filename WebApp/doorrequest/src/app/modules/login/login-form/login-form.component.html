@@ -1,43 +1,37 @@
 <div class="form-container">
   <mat-card>
-     <form novalidate [formGroup]="form" (ngSubmit)="submit()"
-     class="form">
-        <mat-card-title>Aanmelden</mat-card-title>
-        <mat-card-subtitle
-           ><p>
-              Nog geen account? Neem dan contact met ons op.
-           </p></mat-card-subtitle
-        >
-        <mat-card-content class="form-input">
-           <mat-form-field>
-              <input
-                 matInput
-                 formControlName="username"
-                 class="form-control"
-                 placeholder="Gebruikersnaam"
-              />
-           </mat-form-field>
-           <mat-form-field>
-              <input
-                 matInput
-                 type="password"
-                 formControlName="password"
-                 class="form-control"
-                 placeholder="Wachtwoord"
-              /> </mat-form-field
-        ></mat-card-content>
-        <mat-card-actions class="action">
-           <button
-              mat-raised-button
-              type="submit"
-              color="primary"
-           >
-              Aanmelden
-           </button>
-           <div class="text-danger" [hidden]="!form.errors?.notAuthorized">
-              Ongeldige aanmeld gegevens
-           </div>
-        </mat-card-actions>
-     </form></mat-card
-  >
+    <form novalidate [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <mat-card-title>Login to Brixel's entry system</mat-card-title>
+      <mat-card-subtitle
+        ><p>
+          To open the door, enter your credentials and buzz yourself in
+        </p></mat-card-subtitle
+      >
+      <mat-card-content class="form-input">
+        <mat-form-field>
+          <input
+            matInput
+            formControlName="username"
+            class="form-control"
+            placeholder="Username"
+          />
+        </mat-form-field>
+        <mat-form-field>
+          <input
+            matInput
+            type="password"
+            formControlName="password"
+            class="form-control"
+            placeholder="Password"
+          /> </mat-form-field
+      ></mat-card-content>
+      <mat-card-actions class="action">
+        <button mat-raised-button type="submit" color="primary">
+          Login
+        </button>
+        <div class="text-danger" [hidden]="!form.errors?.notAuthorized">
+          Invalid login credentials
+        </div>
+      </mat-card-actions>
+    </form></mat-card>
 </div>

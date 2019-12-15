@@ -35,8 +35,6 @@ export class UserService {
     body.set('grant_type', 'password');
     body.set('client_id', 'space-auth-client');
     body.set('client_secret', 'secret');
-    console.log(this.authUrl);
-    console.log(this.getTokenUrl());
     return this.http
       .post<any>(this.getTokenUrl(), body.toString(), {
         headers
