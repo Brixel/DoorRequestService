@@ -14,7 +14,6 @@ export class ClientConfigurationService {
     constructor(private httpClient: HttpClient) {}
 
     private setClientConfiguration(clientConfiguration: ClientConfiguration) {
-      console.log(clientConfiguration);
         this.currentClientConfigurationSubject.next(clientConfiguration);
     }
 

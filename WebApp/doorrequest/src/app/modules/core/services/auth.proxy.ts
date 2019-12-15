@@ -27,7 +27,6 @@ export class AuthProxy{
 
 
   validateSetupCode(validationCode: number) : Observable<ValidationSetupResultDTO>{
-    console.log(validationCode);
     return this.apiService.post('api/authentication/validate', validationCode).pipe(map((res) => res));
   }
 }
