@@ -1,7 +1,14 @@
-﻿namespace DoorRequest.API.Services
+﻿using System.Security.Cryptography;
+
+namespace DoorRequest.API.Services
 {
     public static class AuthenticationService
     {
-        public static readonly string UniqueKey = "UniqueKey";
+        private static readonly string UniqueKey = "UniqueKey";
+
+        public static string GetAccountKey(string userName)
+        {
+            return UniqueKey + userName;
+        }
     }
 }

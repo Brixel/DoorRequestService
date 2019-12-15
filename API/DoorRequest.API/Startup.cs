@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
-using AspNetCore.Totp;
+﻿using AspNetCore.Totp;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
 using IdentityServer4.AccessTokenValidation;
-using IdentityServer4.Configuration;
-using IdentityServer4.Test;
-using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace DoorRequest.API
@@ -73,6 +68,8 @@ namespace DoorRequest.API
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
+
+            services.AddLogging();
 ;
             var doorConfiguration = Configuration.GetSection("MQTTDoorConfiguration").Get<DoorConfiguration>();
             services.AddScoped<ITotpGenerator, TotpGenerator>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
@@ -31,7 +32,7 @@ namespace DoorRequest.API.Services
                 .WithClientOptions(new MqttClientOptionsBuilder()
                     .WithClientId(_clientId)
                     .WithCredentials(_username, _password)
-                    .WithTcpServer(_server, 8883).WithTls(new MqttClientOptionsBuilderTlsParameters()
+                    .WithTcpServer(_server, 8883).WithTls(new MqttClientOptionsBuilderTlsParameters
                     {
                         AllowUntrustedCertificates = true,
                         SslProtocol = SslProtocols.Tls12,
@@ -43,6 +44,7 @@ namespace DoorRequest.API.Services
                 .Build();
             var mqttClient = new MqttFactory().CreateManagedMqttClient();
             await mqttClient.StartAsync(options);
+            
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic(_topic)
                 .WithPayload("1")
@@ -50,12 +52,7 @@ namespace DoorRequest.API.Services
                 .WithRetainFlag()
                 .Build();
             var result = await mqttClient.PublishAsync(message);
-            if (result.ReasonCode == MqttClientPublishReasonCode.Success)
-            {
-                return true;
-            }
-
-            return false;
+            return result.ReasonCode == MqttClientPublishReasonCode.Success;
         }
     }
 }

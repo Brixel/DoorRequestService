@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Services;
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,10 +24,11 @@ namespace DoorRequest.API.Controllers
         [HttpPost("open")]
         public async Task<bool> OpenDoorRequest([FromBody]int validationCode)
         {
-            var validationResult = _totpValidator.Validate(AuthenticationService.UniqueKey, validationCode);
+            var user = User.GetSubjectId();
+            var validationResult = _totpValidator.Validate(AuthenticationService.GetAccountKey(user), validationCode);
             if (!validationResult)
             {
-                throw new Exception("Invalid validationtoken");
+                throw new Exception("Invalid validation token");
             }
             return await _doorRequestService.OpenDoor();
 
