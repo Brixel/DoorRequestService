@@ -49,7 +49,6 @@ namespace DoorRequest.API.Services
                 .WithTopic(_topic)
                 .WithPayload("1")
                 .WithExactlyOnceQoS()
-                .WithRetainFlag()
                 .Build();
             var result = await mqttClient.PublishAsync(message);
             return result.ReasonCode == MqttClientPublishReasonCode.Success;
