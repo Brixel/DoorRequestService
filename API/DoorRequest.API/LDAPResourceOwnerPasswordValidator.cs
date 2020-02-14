@@ -7,6 +7,7 @@ using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Novell.Directory.Ldap;
 
 namespace DoorRequest.API
@@ -17,10 +18,12 @@ namespace DoorRequest.API
         private const string ATTR_PASSWORD = "userPassword";
         private const string ATTR_OBJECTCLASS = "objectclass";
         private readonly IConfiguration _configuration;
+        private readonly ILogger<LDAPResourceOwnerPasswordValidator> _logger;
 
-        public LDAPResourceOwnerPasswordValidator(IConfiguration configuration)
+        public LDAPResourceOwnerPasswordValidator(IConfiguration configuration, ILogger<LDAPResourceOwnerPasswordValidator> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
         public Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
         {
@@ -63,9 +66,11 @@ namespace DoorRequest.API
                 }
                 ldapUser.Validate(context.Password);
 
+                var groupResults = lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, formattedGroupFilter, null, false);
+                
+                _logger.LogInformation("Disconnecting LDAP Connection");
+                lc.Disconnect();
 
-                var groupResults = 
-                    lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, formattedGroupFilter, null, false);
                 var groups = new List<string>();
                 while (groupResults.HasMore())
                 {
