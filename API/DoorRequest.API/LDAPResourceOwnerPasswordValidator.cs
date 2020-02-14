@@ -16,6 +16,7 @@ namespace DoorRequest.API
     {
         private const string ATTR_COMMON_NAME = "cn";
         private const string ATTR_PASSWORD = "userPassword";
+        private const string ATTR_OBJECTCLASS = "objectclass";
         private readonly IConfiguration _configuration;
         private readonly ILogger<LDAPResourceOwnerPasswordValidator> _logger;
 
@@ -40,7 +41,8 @@ namespace DoorRequest.API
                 var formattedGroupFilter = string.Format(ldapConfig.SearchGroupFilter, context.UserName);
                 
                 var userResults = lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, 
-                    formattedUserFilter, new[] {ATTR_PASSWORD, ATTR_COMMON_NAME}, false);
+                    formattedUserFilter, 
+                    new[] { ATTR_PASSWORD, ATTR_COMMON_NAME, ATTR_OBJECTCLASS }, false);
                 LDAPUser ldapUser = null;
                 while (userResults.HasMore())
                 {
@@ -64,12 +66,10 @@ namespace DoorRequest.API
                 }
                 ldapUser.Validate(context.Password);
 
-
                 var groupResults = lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, formattedGroupFilter, null, false);
                 
                 _logger.LogInformation("Disconnecting LDAP Connection");
                 lc.Disconnect();
-                
 
                 var groups = new List<string>();
                 while (groupResults.HasMore())
