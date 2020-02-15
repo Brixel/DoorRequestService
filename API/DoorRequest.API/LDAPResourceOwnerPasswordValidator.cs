@@ -67,10 +67,7 @@ namespace DoorRequest.API
                 ldapUser.Validate(context.Password);
 
                 var groupResults = lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, formattedGroupFilter, null, false);
-                
-                _logger.LogInformation("Disconnecting LDAP Connection");
-                lc.Disconnect();
-
+               
                 var groups = new List<string>();
                 while (groupResults.HasMore())
                 {
@@ -82,9 +79,15 @@ namespace DoorRequest.API
                     }
                 }
 
+                _logger.LogInformation("Disconnecting LDAP Connection");
+                lc.Disconnect();
+
+
 
                 if (!groups.Contains(groupName))
                 {
+
+                    _logger.LogInformation($"User {context.UserName} not in expected group '{groupName}'");
                     context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
                 }
                 else
