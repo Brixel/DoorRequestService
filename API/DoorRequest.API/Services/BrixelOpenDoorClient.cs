@@ -42,16 +42,19 @@ namespace DoorRequest.API.Services
                     })
                     .Build())
                 .Build();
-            var mqttClient = new MqttFactory().CreateManagedMqttClient();
-            await mqttClient.StartAsync(options);
+            using (var mqttClient = new MqttFactory().CreateManagedMqttClient())
+            {
+                await mqttClient.StartAsync(options);
+
+                var message = new MqttApplicationMessageBuilder()
+                    .WithTopic(_topic)
+                    .WithPayload("1")
+                    .WithExactlyOnceQoS()
+                    .Build();
+                var result = await mqttClient.PublishAsync(message);
+                return result.ReasonCode == MqttClientPublishReasonCode.Success;
+            };
             
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic(_topic)
-                .WithPayload("1")
-                .WithExactlyOnceQoS()
-                .Build();
-            var result = await mqttClient.PublishAsync(message);
-            return result.ReasonCode == MqttClientPublishReasonCode.Success;
         }
     }
 }
