@@ -1,11 +1,10 @@
-﻿using System;
-using System.Security.Authentication;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using MQTTnet;
+﻿using MQTTnet;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
 using MQTTnet.Extensions.ManagedClient;
+using System.Security.Authentication;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DoorRequest.API.Services
 {
@@ -16,6 +15,7 @@ namespace DoorRequest.API.Services
         private readonly string _password;
         private readonly string _server;
         private readonly string _topic;
+        private readonly IMqttClientOptions _options;
 
         public BrixelOpenDoorClient(string clientId, string username, string password, string server, string topic)
         {
@@ -24,37 +24,37 @@ namespace DoorRequest.API.Services
             _password = password;
             _server = server;
             _topic = topic;
-        }
-        public async Task<bool> OpenDoor()
-        {
-            var options = new ManagedMqttClientOptionsBuilder()
-                .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
-                .WithClientOptions(new MqttClientOptionsBuilder()
+
+            _options = new MqttClientOptionsBuilder()
                     .WithClientId(_clientId)
                     .WithCredentials(_username, _password)
-                    .WithTcpServer(_server, 8883).WithTls(new MqttClientOptionsBuilderTlsParameters
+                    .WithTcpServer(_server, 8883)
+                    .WithTls(new MqttClientOptionsBuilderTlsParameters
                     {
                         AllowUntrustedCertificates = true,
                         SslProtocol = SslProtocols.Tls12,
                         IgnoreCertificateChainErrors = true,
                         IgnoreCertificateRevocationErrors = true,
                         UseTls = true
-                    })
-                    .Build())
-                .Build();
-            using (var mqttClient = new MqttFactory().CreateManagedMqttClient())
-            {
-                await mqttClient.StartAsync(options);
+                    }).Build();
+        }
 
+        public async Task<bool> OpenDoor()
+        {
+            using (var mqttClient = new MqttFactory().CreateMqttClient())
+            {
+                await mqttClient.ConnectAsync(_options, CancellationToken.None);
                 var message = new MqttApplicationMessageBuilder()
                     .WithTopic(_topic)
                     .WithPayload("1")
                     .WithExactlyOnceQoS()
                     .Build();
-                var result = await mqttClient.PublishAsync(message);
-                return result.ReasonCode == MqttClientPublishReasonCode.Success;
-            };
-            
+                var result = await mqttClient.PublishAsync(message, CancellationToken.None);
+                var isSuccess = result.ReasonCode == MqttClientPublishReasonCode.Success;
+
+                return isSuccess;
+            }
+
         }
     }
 }
