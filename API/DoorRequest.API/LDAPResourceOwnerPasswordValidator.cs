@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace DoorRequest.API
         }
         public Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
         {
-            var ldapConfig = _configuration.GetSection("LDAPConnection").Get<LDAPConnection>();
+            var ldapConfig = _configuration.GetSection("Authentication:LDAPConnectionOptions").Get<LDAPConnectionOptions>();
             var groupName = ldapConfig.LDAPGroupName;
 
             LdapConnection lc = new LdapConnection();
@@ -87,7 +88,7 @@ namespace DoorRequest.API
                 if (!groups.Contains(groupName))
                 {
 
-                    _logger.LogInformation($"User {context.UserName} not in expected group '{groupName}'");
+                    _logger.LogInformation($"LDAPUser {context.UserName} not in expected group '{groupName}'");
                     context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
                 }
                 else
@@ -112,34 +113,82 @@ namespace DoorRequest.API
 
     }
 
-    public class LDAPUser
+    public class FileBasedResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
-        public string UserName { get; set; }
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<FileBasedResourceOwnerPasswordValidator> _logger;
 
-        public string Password { get; set; }
-
-        public void Validate(string contextPassword)
+        public FileBasedResourceOwnerPasswordValidator(IConfiguration configuration, ILogger<FileBasedResourceOwnerPasswordValidator> logger)
         {
-            OpenLDAPPasswordHelpers.Compare(contextPassword, Password);
+            _configuration = configuration;
+            _logger = logger;
+        }
+        public async Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
+        {
+            var fileBasedAuthConfiguration = 
+                _configuration
+                    .GetSection("Authentication:FileBasedAuthentication")
+                    .Get<FileBasedAuthenticationOptions>();
+            if (!File.Exists(fileBasedAuthConfiguration.Path))
+            {
+                throw new Exception("File not found");
+            }
+
+            var linesInFile = await File.ReadAllLinesAsync(fileBasedAuthConfiguration.Path);
+            FileUser user = null;
+            foreach (var line in linesInFile)
+            {
+                var splitLine = line.Split(";");
+                if (splitLine.Length != 2)
+                {
+                    continue;
+                }
+
+                user = FileUser.Create(splitLine[0], splitLine[1]);
+                if (user.Username != context.UserName)
+                {
+                    user = null;
+                    continue;
+                }
+
+                user.Validate(context.Password);
+            }
+
+            if (user == null)
+            {
+                context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
+                return;
+            }
+            var claims = new List<Claim>()
+            {
+                new Claim(JwtClaimTypes.Subject, context.UserName)
+            };
+
+            context.Result = new GrantValidationResult(subject: context.UserName,
+                OidcConstants.AuthenticationMethods.Password, claims);
         }
     }
 
-
-
-    public class LDAPConnection
+    public class FileUser
     {
-        public string Url { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
 
-        public int Port { get; set; }
+        public static FileUser Create(string username, string password)
+        {
+            return new FileUser()
+            {
+                Username = username,
+                Password = password
+            };
+        }
 
-        public string BaseDN { get; set; }
-        public string BindDn { get; set; }
-
-        public string BindCredentials { get; set; }
-
-        public string LDAPGroupName { get; set; }
-
-        public string SearchUserFilter { get; set; }
-        public string SearchGroupFilter { get; set; }
+        public void Validate(string password)
+        {
+            if (password != Password)
+            {
+                throw new Exception("Passwords don't match");
+            }
+        }
     }
 }
