@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -48,19 +49,45 @@ namespace DoorRequest.API
                     .RequireAuthenticatedUser()
                     .Build();
             });
-            services.AddIdentityServer(options =>
-                {
-                    options.Events.RaiseErrorEvents = true;
-                    options.Events.RaiseFailureEvents = true;
-                    options.Events.RaiseInformationEvents = true;
-                    options.Events.RaiseSuccessEvents = true;;
-                })
-                .AddDeveloperSigningCredential()
-                .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
-                .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
-                .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
-                .AddProfileService<LDAPProfileService>()
-                .AddResourceOwnerValidator<LDAPResourceOwnerPasswordValidator>();
+
+            var hasLDAPConfiguration = Configuration.GetSection("Authentication:LDAPConnectionOptions").GetChildren().Any();
+
+            if (hasLDAPConfiguration)
+            {
+
+                services.AddIdentityServer(options =>
+                    {
+                        options.Events.RaiseErrorEvents = true;
+                        options.Events.RaiseFailureEvents = true;
+                        options.Events.RaiseInformationEvents = true;
+                        options.Events.RaiseSuccessEvents = true; ;
+                    })
+                    .AddDeveloperSigningCredential()
+                    .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
+                    .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
+                    .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
+                    .AddProfileService<FullNameProfileService>()
+                    .AddResourceOwnerValidator<LDAPResourceOwnerPasswordValidator>();
+            }
+            else
+            {
+                services.AddIdentityServer(options =>
+                    {
+                        options.Events.RaiseErrorEvents = true;
+                        options.Events.RaiseFailureEvents = true;
+                        options.Events.RaiseInformationEvents = true;
+                        options.Events.RaiseSuccessEvents = true;
+                        ;
+                    })
+                    .AddDeveloperSigningCredential()
+                    .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
+                    .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
+                    .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
+                    .AddProfileService<FullNameProfileService>()
+                    .AddResourceOwnerValidator<FileBasedResourceOwnerPasswordValidator>();
+            }
+            
+
 
             services.AddCors(options =>
             {

@@ -7,11 +7,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace DoorRequest.API
 {
-    public class LDAPProfileService : IProfileService
+    public class FullNameProfileService : IProfileService
     {
         private readonly IConfiguration _configuration;
 
-        public LDAPProfileService(IConfiguration configuration)
+        public FullNameProfileService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
