@@ -18,15 +18,18 @@ namespace DoorRequest.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger<Startup> _logger;
+
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
+            _logger = logger;
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services, ILogger<Startup> logger)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationInsightsTelemetry();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -54,7 +57,7 @@ namespace DoorRequest.API
 
             if (hasLDAPConfiguration)
             {
-                logger.LogInformation("Using LDAP based authentication")
+                _logger.LogInformation("Using LDAP based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
@@ -71,7 +74,7 @@ namespace DoorRequest.API
             }
             else
             {
-                logger.LogInformation("Using file based authentication");
+                _logger.LogInformation("Using file based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
