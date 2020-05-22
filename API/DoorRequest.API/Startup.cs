@@ -109,11 +109,14 @@ namespace DoorRequest.API
             services.AddScoped<ITotpValidator, TotpValidator>();
             services.AddScoped<IBrixelOpenDoorClient>(x =>
                 new BrixelOpenDoorClient(
-                    doorConfiguration.MQTTClientId, 
-                    doorConfiguration.MQTTUsername, 
-                    doorConfiguration.MQTTPassword, 
-                    doorConfiguration.MQTTServer,
-                    doorConfiguration.MQTTTopic));
+                    doorConfiguration.ClientId, 
+                    doorConfiguration.Server,
+                    doorConfiguration.Topic,
+                    doorConfiguration.Port,
+                    doorConfiguration.UseSSL,
+                    doorConfiguration.Username,
+                    doorConfiguration.Password
+                    ));
             services.AddScoped<IDoorRequestService, DoorRequestService>();
             services.Configure<AccountKeyConfiguration>(Configuration.GetSection("AccountKeyConfiguration"));
             services.AddScoped<IAccountKeyService, AccountKeyService>();
