@@ -1,4 +1,5 @@
-﻿using MQTTnet;
+﻿using System;
+using MQTTnet;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
 using MQTTnet.Extensions.ManagedClient;
@@ -10,25 +11,24 @@ namespace DoorRequest.API.Services
 {
     public class BrixelOpenDoorClient : IBrixelOpenDoorClient
     {
-        private readonly string _clientId;
-        private readonly string _username;
-        private readonly string _password;
-        private readonly string _server;
         private readonly string _topic;
         private readonly IMqttClientOptions _options;
 
-        public BrixelOpenDoorClient(string clientId, string username, string password, string server, string topic)
+        public BrixelOpenDoorClient(string clientId, string server, string topic, int port, bool useSSL = true, string username = null, string password = null)
         {
-            _clientId = clientId;
-            _username = username;
-            _password = password;
-            _server = server;
             _topic = topic;
+            var optionsBuilder = new MqttClientOptionsBuilder()
+                .WithClientId(clientId)
+                .WithTcpServer(server, port);
 
-            _options = new MqttClientOptionsBuilder()
-                    .WithClientId(_clientId)
-                    .WithCredentials(_username, _password)
-                    .WithTcpServer(_server, 8883)
+            if (!string.IsNullOrWhiteSpace(username) || !string.IsNullOrWhiteSpace(password))
+            {
+                optionsBuilder.WithCredentials(username, password);
+            }
+
+            if (useSSL)
+            {
+                optionsBuilder
                     .WithTls(new MqttClientOptionsBuilderTlsParameters
                     {
                         AllowUntrustedCertificates = true,
@@ -36,7 +36,10 @@ namespace DoorRequest.API.Services
                         IgnoreCertificateChainErrors = true,
                         IgnoreCertificateRevocationErrors = true,
                         UseTls = true
-                    }).Build();
+                    });
+            }
+
+            _options = optionsBuilder.Build();
         }
 
         public async Task<bool> OpenDoor()

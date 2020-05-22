@@ -2,10 +2,12 @@
 {
     public class DoorConfiguration
     {
-        public string MQTTClientId { get; set; }
-        public string MQTTUsername { get; set; }
-        public string MQTTPassword { get; set; }
-        public string MQTTServer { get; set; }
-        public string MQTTTopic { get; set; }
+        public string ClientId { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Server { get; set; }
+        public string Topic { get; set; }
+        public int Port { get; set; }
+        public bool UseSSL { get; set; }
     }
 }
