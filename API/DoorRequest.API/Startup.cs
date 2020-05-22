@@ -18,8 +18,11 @@ namespace DoorRequest.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger<Startup> _logger;
+
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
+            _logger = logger;
             Configuration = configuration;
         }
 
@@ -54,7 +57,7 @@ namespace DoorRequest.API
 
             if (hasLDAPConfiguration)
             {
-
+                _logger.LogInformation("Using LDAP based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
@@ -71,6 +74,7 @@ namespace DoorRequest.API
             }
             else
             {
+                _logger.LogInformation("Using file based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
