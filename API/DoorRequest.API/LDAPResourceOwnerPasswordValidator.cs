@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices;
+using System.DirectoryServices.Protocols;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Novell.Directory.Ldap;
-
 namespace DoorRequest.API
 {
     public class LDAPResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
@@ -29,60 +31,51 @@ namespace DoorRequest.API
         {
             var ldapConfig = _configuration.GetSection("Authentication:LDAPConnectionOptions").Get<LDAPConnectionOptions>();
             var groupName = ldapConfig.LDAPGroupName;
-
-            LdapConnection lc = new LdapConnection();
+            using DirectoryEntry de = new DirectoryEntry($"LDAP://{ldapConfig.Url}/{ldapConfig.BaseDN}",
+                ldapConfig.BindDn, ldapConfig.BindCredentials, AuthenticationTypes.None);
+            
             try
             {
-                lc.Connect(ldapConfig.Url, ldapConfig.Port);
-                lc.Bind(ldapConfig.BindDn, ldapConfig.BindCredentials);
-
-
                 var formattedUserFilter = string.Format(ldapConfig.SearchUserFilter, context.UserName);
                 var formattedGroupFilter = string.Format(ldapConfig.SearchGroupFilter, context.UserName);
-                
-                var userResults = lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, 
-                    formattedUserFilter, 
-                    new[] { ATTR_PASSWORD, ATTR_COMMON_NAME, ATTR_OBJECTCLASS }, false);
-                LDAPUser ldapUser = null;
-                while (userResults.HasMore())
-                {
-                    var nextEntry = userResults.Next();
-                    var cn = nextEntry.getAttribute(ATTR_COMMON_NAME);
-                    var password = nextEntry.getAttribute(ATTR_PASSWORD);
-                    if (cn != null)
-                    {
-                        ldapUser = new LDAPUser()
-                        {
-                            UserName = cn.StringValue,
-                            Password = password.StringValue
-                        };
-                    }
-                }
 
-                if (ldapUser == null)
+                DirectorySearcher searcher = new DirectorySearcher(de)
+                {
+                    PageSize = int.MaxValue,
+                    Filter = formattedUserFilter
+                };
+                var result = searcher.FindOne();
+                LDAPUser ldapUser = null;
+                if (result == null)
                 {
                     context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
                     return Task.CompletedTask;
                 }
-                ldapUser.Validate(context.Password);
 
-                var groupResults = lc.Search(ldapConfig.BaseDN, LdapConnection.SCOPE_SUB, formattedGroupFilter, null, false);
-               
-                var groups = new List<string>();
-                while (groupResults.HasMore())
+                var commonName = result.Properties[ATTR_COMMON_NAME][0].ToString();
+                var bytes = result.Properties[ATTR_PASSWORD][0] as byte[];
+                var byteString = Encoding.UTF8.GetString(bytes);
+                ldapUser = new LDAPUser()
                 {
-                    var nextEntry = groupResults.Next();
-                    var cn = nextEntry.getAttribute(ATTR_COMMON_NAME);
-                    if (cn != null)
-                    {
-                        groups.Add(cn.StringValue);
-                    }
+                    UserName = commonName,
+                    Password = byteString
+                };
+                // TODO Uncomment!
+                //ldapUser.Validate(context.Password);
+
+                DirectorySearcher groupSearcher = new DirectorySearcher(de)
+                {
+                    PageSize = int.MaxValue,
+                    Filter = formattedGroupFilter
+                };
+
+                var groups = new List<string>();
+                var groupResults = groupSearcher.FindAll();
+                for (int i = 0; i < groupResults.Count; i++)
+                {
+                    var group = groupResults[i];
+                    groups.Add(group.Properties[ATTR_COMMON_NAME][0].ToString());
                 }
-
-                _logger.LogInformation("Disconnecting LDAP Connection");
-                lc.Disconnect();
-
-
 
                 if (!groups.Contains(groupName))
                 {
