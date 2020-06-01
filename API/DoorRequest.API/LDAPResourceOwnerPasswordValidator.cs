@@ -60,8 +60,7 @@ namespace DoorRequest.API
                     UserName = commonName,
                     Password = byteString
                 };
-                // TODO Uncomment!
-                //ldapUser.Validate(context.Password);
+                ldapUser.Validate(context.Password);
 
                 DirectorySearcher groupSearcher = new DirectorySearcher(de)
                 {
