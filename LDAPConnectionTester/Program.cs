@@ -1,40 +1,48 @@
 ﻿using System;
-using System.DirectoryServices;
-using System.DirectoryServices.Protocols;
-using System.Net;
-using System.Text;
+using Novell.Directory.Ldap;
 
 namespace DoorRequest.LDAPConnectionTester
 {
     class Program
     {
+        private const string ATTR_COMMON_NAME = "cn";
+        private const string ATTR_PASSWORD = "userPassword";
+        private const string ATTR_OBJECTCLASS = "objectclass";
         static void Main(string[] args)
         {
-            string ldapServer = "";
-            string bindDN = "";
-            string bindDNPassword = "";
+            string ldapServer = "10.0.0.13";
+            string bindDN = "cn=admin,dc=contoso,dc=com";
+            string bindDNPassword = "P@ss1W0Rd!";
 
             var username = "";
             var password = "";
             Console.WriteLine("Attempting to connect");
             try
             {
-                using DirectoryEntry de = new DirectoryEntry(ldapServer, bindDN, bindDNPassword, AuthenticationTypes.None);
-                DirectorySearcher searcher = new DirectorySearcher(de)
+                using (var connection = new LdapConnection())
                 {
-                    PageSize = int.MaxValue,
-                    Filter = $"(&(uid={username}))"
-                };
-                var result = searcher.FindOne();
+                    connection.Connect(ldapServer, 389);
+                    //connection.Connect(new Uri($"LDAP://{ldapServer}:389/dc=contoso,dc=com"));
+                    //connection.Bind(Native.LdapAuthMechanism.SIMPLE, bindDN, bindDNPassword);
+                    connection.Bind(bindDN, bindDNPassword);
 
-                if (result != null)
-                {
-                    var entry = result.GetDirectoryEntry();
-                    Console.WriteLine(entry);
-                    var bytes = result.Properties["userPassword"][0] as byte[];
-                    var byteString = Encoding.UTF8.GetString(bytes);
-                    Console.WriteLine(byteString);
+                    var userResults = 
+                        connection.Search(
+                            "dc=contoso,dc=com", 
+                            LdapConnection.ScopeSub,
+                            string.Format("(&(objectclass=posixAccount)(uid={0}))", "Berend"),
+                            new[] { ATTR_PASSWORD, ATTR_COMMON_NAME, ATTR_OBJECTCLASS }, 
+                            false);
+
+                    while (userResults.HasMore())
+                    {
+                        var nextEntry = userResults.Next();
+                        var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
+                        var userpassword = nextEntry.GetAttribute(ATTR_PASSWORD);
+                        Console.WriteLine(cn);
+                    }
                 }
+                
                 //connection.Bind();
                 //Console.WriteLine(dirctoryEntry.Name);
                 //object nativeObject = dirctoryEntry.NativeObject;

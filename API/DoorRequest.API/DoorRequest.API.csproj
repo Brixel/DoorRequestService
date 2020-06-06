@@ -21,9 +21,9 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="MQTTnet" Version="3.0.5" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="3.0.5" />
+    <PackageReference Include="Novell.Directory.Ldap.NETStandard" Version="3.2.0" />
     <PackageReference Include="Serilog" Version="2.9.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
-    <PackageReference Include="System.DirectoryServices" Version="4.6.0" />
     <PackageReference Include="System.DirectoryServices.Protocols" Version="4.6.0" />
   </ItemGroup>
 
