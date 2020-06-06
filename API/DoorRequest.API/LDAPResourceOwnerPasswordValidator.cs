@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.DirectoryServices;
-using System.DirectoryServices.Protocols;
-using System.Linq;
-using System.Net;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Novell.Directory.Ldap;
+
 namespace DoorRequest.API
 {
     public class LDAPResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
@@ -31,78 +28,81 @@ namespace DoorRequest.API
         {
             var ldapConfig = _configuration.GetSection("Authentication:LDAPConnectionOptions").Get<LDAPConnectionOptions>();
             var groupName = ldapConfig.LDAPGroupName;
-            using (DirectoryEntry de = new DirectoryEntry($"LDAP://{ldapConfig.Url}/{ldapConfig.BaseDN}",
-                ldapConfig.BindDn, ldapConfig.BindCredentials, AuthenticationTypes.None))
+            using (var connection = new LdapConnection())
             {
-                try
+                connection.Connect(ldapConfig.Url, ldapConfig.Port);
+                connection.Bind(ldapConfig.BindDn, ldapConfig.BindCredentials);
+
+                var formattedUserFilter = string.Format(ldapConfig.SearchUserFilter, context.UserName);
+                var formattedGroupFilter = string.Format(ldapConfig.SearchGroupFilter, context.UserName);
+
+                var userResults = connection.Search(
+                    ldapConfig.BaseDN, 
+                    LdapConnection.ScopeSub,
+                    formattedUserFilter,
+                    new[] { ATTR_PASSWORD, ATTR_COMMON_NAME, ATTR_OBJECTCLASS }, 
+                    false);
+
+                LDAPUser ldapUser = null;
+                while (userResults.HasMore())
                 {
-                    var formattedUserFilter = string.Format(ldapConfig.SearchUserFilter, context.UserName);
-                    var formattedGroupFilter = string.Format(ldapConfig.SearchGroupFilter, context.UserName);
-
-                    DirectorySearcher searcher = new DirectorySearcher(de)
+                    var nextEntry = userResults.Next();
+                    var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
+                    var password = nextEntry.GetAttribute(ATTR_PASSWORD);
+                    if (cn != null)
                     {
-                        PageSize = int.MaxValue,
-                        Filter = formattedUserFilter
-                    };
-                    var result = searcher.FindOne();
-                    LDAPUser ldapUser = null;
-                    if (result == null)
-                    {
-                        context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
-                        return Task.CompletedTask;
+                        ldapUser = new LDAPUser()
+                        {
+                            UserName = cn.StringValue,
+                            Password = password.StringValue
+                        };
                     }
-
-                    var commonName = result.Properties[ATTR_COMMON_NAME][0].ToString();
-                    var bytes = result.Properties[ATTR_PASSWORD][0] as byte[];
-                    var byteString = Encoding.UTF8.GetString(bytes);
-                    ldapUser = new LDAPUser()
-                    {
-                        UserName = commonName,
-                        Password = byteString
-                    };
-                    ldapUser.Validate(context.Password);
-
-                    DirectorySearcher groupSearcher = new DirectorySearcher(de)
-                    {
-                        PageSize = int.MaxValue,
-                        Filter = formattedGroupFilter
-                    };
-
-                    var groups = new List<string>();
-                    var groupResults = groupSearcher.FindAll();
-                    for (int i = 0; i < groupResults.Count; i++)
-                    {
-                        var group = groupResults[i];
-                        groups.Add(group.Properties[ATTR_COMMON_NAME][0].ToString());
-                    }
-
-                    if (!groups.Contains(groupName))
-                    {
-
-                        _logger.LogInformation($"LDAPUser {context.UserName} not in expected group '{groupName}'");
-                        context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
-                    }
-                    else
-                    {
-                        var claims = new List<Claim>()
-                    {
-                        new Claim(JwtClaimTypes.Subject, context.UserName)
-                    };
-
-                        context.Result = new GrantValidationResult(subject: context.UserName,
-                            OidcConstants.AuthenticationMethods.Password, claims);
-                    }
-
-                    return Task.CompletedTask;
                 }
-                catch (Exception ex)
+
+                if (ldapUser == null)
                 {
                     context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
-                    return Task.FromResult(false);
+                    return Task.CompletedTask;
                 }
+                ldapUser.Validate(context.Password);
+
+                var groupResults = connection.Search(
+                    ldapConfig.BaseDN, 
+                    LdapConnection.ScopeSub, 
+                    formattedGroupFilter, 
+                    null, 
+                    false);
+
+                var groups = new List<string>();
+                while (groupResults.HasMore())
+                {
+                    var nextEntry = groupResults.Next();
+                    var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
+                    if (cn != null)
+                    {
+                        groups.Add(cn.StringValue);
+                    }
+                }
+                if (!groups.Contains(groupName))
+                {
+
+                    _logger.LogInformation($"LDAPUser {context.UserName} not in expected group '{groupName}'");
+                    context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
+                }
+                else
+                {
+                    var claims = new List<Claim>()
+                        {
+                            new Claim(JwtClaimTypes.Subject, context.UserName)
+                        };
+
+                    context.Result = new GrantValidationResult(subject: context.UserName,
+                        OidcConstants.AuthenticationMethods.Password, claims);
+                }
+
+                return Task.CompletedTask;
             }
         }
-
     }
 
     public class FileUser
