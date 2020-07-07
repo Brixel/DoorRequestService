@@ -28,6 +28,7 @@ namespace DoorRequest.API
         {
             var ldapConfig = _configuration.GetSection("Authentication:LDAPConnectionOptions").Get<LDAPConnectionOptions>();
             var groupName = ldapConfig.LDAPGroupName;
+            _logger.LogInformation($"Searching for user '{context.UserName}' in group '{groupName}'");
             using (var connection = new LdapConnection())
             {
                 connection.Connect(ldapConfig.Url, ldapConfig.Port);
@@ -95,7 +96,7 @@ namespace DoorRequest.API
                         {
                             new Claim(JwtClaimTypes.Subject, context.UserName)
                         };
-
+                    _logger.LogInformation($"User '{context.UserName}' is valid and in correct group");
                     context.Result = new GrantValidationResult(subject: context.UserName,
                         OidcConstants.AuthenticationMethods.Password, claims);
                 }
