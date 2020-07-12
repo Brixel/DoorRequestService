@@ -3,6 +3,8 @@ using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +33,8 @@ namespace DoorRequest.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(typeof(ITelemetryChannel),
+                new ServerTelemetryChannel() { StorageFolder = "/logging" });
             services.AddApplicationInsightsTelemetry();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             var identityConfiguration = 
