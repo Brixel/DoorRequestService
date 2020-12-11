@@ -35,7 +35,7 @@ namespace DoorRequest.API
         {
             services.AddSingleton(typeof(ITelemetryChannel),
                 new ServerTelemetryChannel() { StorageFolder = "/logging" });
-            services.AddApplicationInsightsTelemetry();
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             var identityConfiguration = 
                 Configuration.GetSection("IdentityConfiguration").Get<IdentityConfiguration>();
