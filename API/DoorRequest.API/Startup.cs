@@ -16,16 +16,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace DoorRequest.API
 {
     public class Startup
     {
-        private readonly ILogger<Startup> _logger;
 
-        public Startup(IConfiguration configuration, ILogger<Startup> logger)
+        public Startup(IConfiguration configuration)
         {
-            _logger = logger;
             Configuration = configuration;
         }
 
@@ -34,10 +33,7 @@ namespace DoorRequest.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(typeof(ITelemetryChannel),
-                new ServerTelemetryChannel() { StorageFolder = "/logging" });
-            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllers();
             var identityConfiguration = 
                 Configuration.GetSection("IdentityConfiguration").Get<IdentityConfiguration>();
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
@@ -62,7 +58,6 @@ namespace DoorRequest.API
 
             if (hasLDAPConfiguration)
             {
-                _logger.LogInformation("Using LDAP based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
@@ -79,7 +74,6 @@ namespace DoorRequest.API
             }
             else
             {
-                _logger.LogInformation("Using file based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
@@ -105,8 +99,7 @@ namespace DoorRequest.API
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
-
-            services.AddLogging();
+            
 ;
             var doorConfiguration = Configuration.GetSection("MQTTDoorConfiguration").Get<DoorConfiguration>();
             services.AddScoped<ITotpGenerator, TotpGenerator>();
@@ -125,6 +118,8 @@ namespace DoorRequest.API
             services.AddScoped<IDoorRequestService, DoorRequestService>();
             services.Configure<AccountKeyConfiguration>(Configuration.GetSection("AccountKeyConfiguration"));
             services.AddScoped<IAccountKeyService, AccountKeyService>();
+            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -139,7 +134,7 @@ namespace DoorRequest.API
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseSerilogRequestLogging();
+            //app.UseSerilogRequestLogging();
             // TODO Uncomment once connection to LDAP is over SSL
             //app.UseHttpsRedirection();
 
@@ -150,6 +145,7 @@ namespace DoorRequest.API
             app.UseIdentityServer();
 
             app.UseCors("CorsPolicy");
+            
 
             app.UseEndpoints(routes =>
             {

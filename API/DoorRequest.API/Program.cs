@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
@@ -21,7 +22,7 @@ namespace DoorRequest.API
             try
             {
                 Log.Information("Starting web host");
-                CreateWebHostBuilder(args).Build().Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
             {
@@ -33,10 +34,11 @@ namespace DoorRequest.API
             }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://*:5001")
-                .UseSerilog()
-                .UseStartup<Startup>();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
