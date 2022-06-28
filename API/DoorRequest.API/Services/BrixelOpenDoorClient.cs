@@ -1,18 +1,17 @@
-﻿using System;
+﻿
 using MQTTnet;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Publishing;
-using MQTTnet.Extensions.ManagedClient;
 using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
+using MQTTnet.Client;
+using MQTTnet.Protocol;
 
 namespace DoorRequest.API.Services
 {
     public class BrixelOpenDoorClient : IBrixelOpenDoorClient
     {
         private readonly string _topic;
-        private readonly IMqttClientOptions _options;
+        private readonly MqttClientOptions _options;
 
         public BrixelOpenDoorClient(string clientId, string server, string topic, int port, bool useSSL = true, string username = null, string password = null)
         {
@@ -44,20 +43,17 @@ namespace DoorRequest.API.Services
 
         public async Task<bool> OpenDoor()
         {
-            using (var mqttClient = new MqttFactory().CreateMqttClient())
-            {
-                await mqttClient.ConnectAsync(_options, CancellationToken.None);
-                var message = new MqttApplicationMessageBuilder()
-                    .WithTopic(_topic)
-                    .WithPayload("1")
-                    .WithExactlyOnceQoS()
-                    .Build();
-                var result = await mqttClient.PublishAsync(message, CancellationToken.None);
-                var isSuccess = result.ReasonCode == MqttClientPublishReasonCode.Success;
+            using var mqttClient = new MqttFactory().CreateMqttClient();
+            await mqttClient.ConnectAsync(_options, CancellationToken.None);
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic(_topic)
+                .WithPayload("1")
+                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.ExactlyOnce)
+                .Build();
+            var result = await mqttClient.PublishAsync(message, CancellationToken.None);
+            var isSuccess = result.ReasonCode == MqttClientPublishReasonCode.Success;
 
-                return isSuccess;
-            }
-
+            return isSuccess;
         }
     }
 }

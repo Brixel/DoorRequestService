@@ -1,10 +1,13 @@
-ldap:
-   container_name: openldap
-   image: osixia/openldap:latest
-   ports:
-     - "389:389"
-     - "636:636"
-   env_file:
-     - ./ldap.env
-   volumes:
-     - ./ldap:/data/ldif
+version: '3.0'
+
+services:
+  ldap:
+    container_name: openldap
+    image: osixia/openldap:latest
+    ports:
+      - "389:389"
+      - "636:636"
+    env_file:
+      - ./ldap.env
+    volumes:
+      - ./ldap:/data/ldif

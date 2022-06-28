@@ -1,4 +1,5 @@
-﻿using AspNetCore.Totp;
+﻿using System.Linq;
+using AspNetCore.Totp;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
@@ -10,9 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
@@ -36,7 +37,7 @@ namespace DoorRequest.API
             services.AddSingleton(typeof(ITelemetryChannel),
                 new ServerTelemetryChannel() { StorageFolder = "/logging" });
             Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             var identityConfiguration = 
                 Configuration.GetSection("IdentityConfiguration").Get<IdentityConfiguration>();
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
@@ -127,7 +128,7 @@ namespace DoorRequest.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -142,18 +143,17 @@ namespace DoorRequest.API
             // TODO Uncomment once connection to LDAP is over SSL
             //app.UseHttpsRedirection();
 
+            app.UseRouting();
+
             app.UseAuthentication();
 
             app.UseIdentityServer();
 
             app.UseCors("CorsPolicy");
 
-
-            app.UseMvc(routes =>
+            app.UseEndpoints(routes =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=GetAboutVersion}/{id?}");
+                routes.MapControllers();
             });
         }
     }
