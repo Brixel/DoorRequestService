@@ -5,7 +5,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthService } from '../core/services/auth.service';
 import { DoorService } from '../core/services/door.service';
 import { SharedModule } from '../shared/shared.module';
-import { MatSnackBarModule } from '@angular/material';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 const routes: Routes = [{path: '', component: DashboardComponent}]
 
