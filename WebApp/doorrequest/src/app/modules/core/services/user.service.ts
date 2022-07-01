@@ -1,68 +1,89 @@
-import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { JwtHelperService } from '@auth0/angular-jwt';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ClientConfigurationService } from './clientconfiguration.service';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { from, Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { ClientConfigurationService } from "./clientconfiguration.service";
+import { AuthConfig, OAuthService } from "angular-oauth2-oidc";
 
 @Injectable()
 export class UserService {
-  authUrl: string;
-  private tokenURL = this.authUrl + 'connect/token';
-  private userInfoURL = this.authUrl + 'connect/userinfo';
   constructor(
     private http: HttpClient,
-    private jwtHelper: JwtHelperService,
+    private oauthService: OAuthService,
     private clientConfigurationService: ClientConfigurationService
-  ) {}
+  ) {
+    this.fixAuthConfigWithClientConfiguration(authConfig);
+    this.oauthService.configure(authConfig);
+    this.oauthService.loadDiscoveryDocument();
+    this.oauthService.setStorage(sessionStorage);
+  }
 
   getUserInfo(): Observable<any> {
-    return this.http.get(this.userInfoURL).pipe(map(res => res));
+    const authUrl =
+      this.clientConfigurationService.getClientConfiguration().authUri;
+    const userInfoURL = `${authUrl}/connect/userinfo`;
+    return this.http.get(userInfoURL).pipe(map((res) => res));
   }
 
   getTokenUrl() {
-    this.authUrl = this.clientConfigurationService.getClientConfiguration().authUri;
-    return this.authUrl + 'connect/token';
+    const authUrl =
+      this.clientConfigurationService.getClientConfiguration().authUri;
+    return `${authUrl}/connect/token`;
   }
 
   authenticate(username: string, password: string): Observable<any> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/x-www-form-urlencoded'
-    });
-    const body = new URLSearchParams();
-    body.set('username', username);
-    body.set('password', password);
-    body.set('grant_type', 'password');
-    body.set('client_id', 'space-auth-client');
-    body.set('client_secret', 'secret');
-    return this.http
-      .post<any>(this.getTokenUrl(), body.toString(), {
-        headers
-      })
-      .pipe(
-        map(jwt => {
-          if (jwt && jwt.access_token) {
-            const token = {
-              access_token: jwt.access_token,
-              expires_in: jwt.expires_in,
-              token_type: jwt.token_type
-            };
-            localStorage.setItem('token', JSON.stringify(token));
-          }
-        })
-      );
+    return from(
+      this.oauthService.fetchTokenUsingPasswordFlow(username, password)
+    );
+    // const headers = new HttpHeaders({
+    //   "Content-Type": "application/x-www-form-urlencoded",
+    // });
+    // const body = new URLSearchParams();
+    // body.set("username", username);
+    // body.set("password", password);
+    // body.set("grant_type", "password");
+    // body.set("client_id", "space-auth-client");
+    // body.set("client_secret", "secret");
+    // return this.http
+    //   .post<any>(this.getTokenUrl(), body.toString(), {
+    //     headers,
+    //   })
+    //   .pipe(
+    //     map((jwt) => {
+    //       if (jwt && jwt.access_token) {
+    //         const token = {
+    //           access_token: jwt.access_token,
+    //           expires_in: jwt.expires_in,
+    //           token_type: jwt.token_type,
+    //         };
+    //         localStorage.setItem("token", JSON.stringify(token));
+    //       }
+    //     })
+    //   );
   }
 
   isAuthenticated() {
-    const token = localStorage.getItem('token');
-    return !this.jwtHelper.isTokenExpired(token);
+    return this.oauthService.hasValidAccessToken();
   }
 
-  getToken() {
-    return this.jwtHelper.tokenGetter();
-  }
+  getToken() {}
 
   logout() {
-    localStorage.removeItem('token');
+    this.oauthService.logOut();
+  }
+
+  private fixAuthConfigWithClientConfiguration(authConfig: AuthConfig) {
+    const baseUrl =
+      this.clientConfigurationService.getClientConfiguration().authUri;
+    authConfig.issuer = baseUrl;
   }
 }
+
+export const authConfig: AuthConfig = {
+  clientId: "space-auth-client",
+  dummyClientSecret: "secret",
+  responseType: "code",
+  scope: "space-auth.api",
+  showDebugInformation: true,
+  requireHttps: "remoteOnly",
+};

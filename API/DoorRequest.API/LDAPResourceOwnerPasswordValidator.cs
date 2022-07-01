@@ -29,80 +29,78 @@ namespace DoorRequest.API
             var ldapConfig = _configuration.GetSection("Authentication:LDAPConnectionOptions").Get<LDAPConnectionOptions>();
             var groupName = ldapConfig.LDAPGroupName;
             _logger.LogInformation($"Searching for user '{context.UserName}' in group '{groupName}'");
-            using (var connection = new LdapConnection())
+            using var connection = new LdapConnection();
+            connection.Connect(ldapConfig.Url, ldapConfig.Port);
+            connection.Bind(ldapConfig.BindDn, ldapConfig.BindCredentials);
+
+            var formattedUserFilter = string.Format(ldapConfig.SearchUserFilter, context.UserName);
+            var formattedGroupFilter = string.Format(ldapConfig.SearchGroupFilter, context.UserName);
+
+            var userResults = connection.Search(
+                ldapConfig.BaseDN, 
+                LdapConnection.ScopeSub,
+                formattedUserFilter,
+                new[] { ATTR_PASSWORD, ATTR_COMMON_NAME, ATTR_OBJECTCLASS }, 
+                false);
+
+            LDAPUser ldapUser = null;
+            while (userResults.HasMore())
             {
-                connection.Connect(ldapConfig.Url, ldapConfig.Port);
-                connection.Bind(ldapConfig.BindDn, ldapConfig.BindCredentials);
-
-                var formattedUserFilter = string.Format(ldapConfig.SearchUserFilter, context.UserName);
-                var formattedGroupFilter = string.Format(ldapConfig.SearchGroupFilter, context.UserName);
-
-                var userResults = connection.Search(
-                    ldapConfig.BaseDN, 
-                    LdapConnection.ScopeSub,
-                    formattedUserFilter,
-                    new[] { ATTR_PASSWORD, ATTR_COMMON_NAME, ATTR_OBJECTCLASS }, 
-                    false);
-
-                LDAPUser ldapUser = null;
-                while (userResults.HasMore())
+                var nextEntry = userResults.Next();
+                var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
+                var password = nextEntry.GetAttribute(ATTR_PASSWORD);
+                if (cn != null)
                 {
-                    var nextEntry = userResults.Next();
-                    var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
-                    var password = nextEntry.GetAttribute(ATTR_PASSWORD);
-                    if (cn != null)
+                    ldapUser = new LDAPUser()
                     {
-                        ldapUser = new LDAPUser()
-                        {
-                            UserName = cn.StringValue,
-                            Password = password.StringValue
-                        };
-                    }
+                        UserName = cn.StringValue,
+                        Password = password.StringValue
+                    };
                 }
+            }
 
-                if (ldapUser == null)
-                {
-                    context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
-                    return Task.CompletedTask;
-                }
-                ldapUser.Validate(context.Password);
-
-                var groupResults = connection.Search(
-                    ldapConfig.BaseDN, 
-                    LdapConnection.ScopeSub, 
-                    formattedGroupFilter, 
-                    null, 
-                    false);
-
-                var groups = new List<string>();
-                while (groupResults.HasMore())
-                {
-                    var nextEntry = groupResults.Next();
-                    var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
-                    if (cn != null)
-                    {
-                        groups.Add(cn.StringValue);
-                    }
-                }
-                if (!groups.Contains(groupName))
-                {
-
-                    _logger.LogInformation($"LDAPUser {context.UserName} not in expected group '{groupName}'");
-                    context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
-                }
-                else
-                {
-                    var claims = new List<Claim>()
-                        {
-                            new Claim(JwtClaimTypes.Subject, context.UserName)
-                        };
-                    _logger.LogInformation($"User '{context.UserName}' is valid and in correct group");
-                    context.Result = new GrantValidationResult(subject: context.UserName,
-                        OidcConstants.AuthenticationMethods.Password, claims);
-                }
-
+            if (ldapUser == null)
+            {
+                context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
                 return Task.CompletedTask;
             }
+            ldapUser.Validate(context.Password);
+
+            var groupResults = connection.Search(
+                ldapConfig.BaseDN, 
+                LdapConnection.ScopeSub, 
+                formattedGroupFilter, 
+                null, 
+                false);
+
+            var groups = new List<string>();
+            while (groupResults.HasMore())
+            {
+                var nextEntry = groupResults.Next();
+                var cn = nextEntry.GetAttribute(ATTR_COMMON_NAME);
+                if (cn != null)
+                {
+                    groups.Add(cn.StringValue);
+                }
+            }
+            if (!groups.Contains(groupName))
+            {
+
+                _logger.LogInformation($"LDAPUser {context.UserName} not in expected group '{groupName}'");
+                context.Result = new GrantValidationResult(TokenRequestErrors.InvalidGrant);
+            }
+            else
+            {
+                var claims = new List<Claim>()
+                {
+                    new Claim(JwtClaimTypes.Subject, context.UserName)
+                };
+                _logger.LogInformation($"User '{context.UserName}' is valid and in correct group");
+                context.Result = new GrantValidationResult(subject: context.UserName,
+                    OidcConstants.AuthenticationMethods.Password, claims);
+            }
+
+            return Task.CompletedTask;
         }
     }
 

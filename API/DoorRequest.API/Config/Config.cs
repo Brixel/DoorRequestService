@@ -21,6 +21,9 @@ namespace DoorRequest.API.Config
             return new List<ApiResource>
             {
                 new ApiResource("space-auth.api", "My API")
+                {
+                    Scopes = new List<string>(){"space-auth.api"}
+                }
             };
         }
 
@@ -42,6 +45,14 @@ namespace DoorRequest.API.Config
                     AllowedScopes = { "space-auth.api" },
                     AllowedCorsOrigins = allowedOrigins.ToList()
                 }
+            };
+        }
+
+        public static IEnumerable<ApiScope> GetApiScopes()
+        {
+            return new List<ApiScope>()
+            {
+                new ApiScope("space-auth.api", "SpaceAuth.API scope")
             };
         }
     }

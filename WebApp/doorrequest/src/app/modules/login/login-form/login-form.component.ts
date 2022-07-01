@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormGroup, FormControl } from "@angular/forms";
+import { UntypedFormGroup, UntypedFormControl } from "@angular/forms";
 import { Router, ActivatedRoute } from "@angular/router";
 import { UserService } from "../../core/services/user.service";
 
@@ -9,7 +9,7 @@ import { UserService } from "../../core/services/user.service";
   styleUrls: ["./login-form.component.scss"]
 })
 export class LoginFormComponent implements OnInit {
-  form: FormGroup;
+  form: UntypedFormGroup;
   private returnUrl: string;
   constructor(
     private userService: UserService,
@@ -22,9 +22,9 @@ export class LoginFormComponent implements OnInit {
       this.returnUrl = params["returnUrl"];
     });
 
-    this.form = new FormGroup({
-      username: new FormControl(null),
-      password: new FormControl(null)
+    this.form = new UntypedFormGroup({
+      username: new UntypedFormControl(null),
+      password: new UntypedFormControl(null)
     });
   }
 
