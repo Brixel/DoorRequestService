@@ -69,6 +69,7 @@ namespace DoorRequest.API
                     .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                     .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
                     .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
+                    .AddInMemoryApiScopes(InMemoryInitConfig.GetApiScopes())
                     .AddProfileService<FullNameProfileService>()
                     .AddResourceOwnerValidator<LDAPResourceOwnerPasswordValidator>();
             }
@@ -86,6 +87,7 @@ namespace DoorRequest.API
                     .AddInMemoryIdentityResources(InMemoryInitConfig.GetIdentityResources())
                     .AddInMemoryApiResources(InMemoryInitConfig.GetApiResources())
                     .AddInMemoryClients(InMemoryInitConfig.GetClients(identityConfiguration.AllowedOrigins))
+                    .AddInMemoryApiScopes(InMemoryInitConfig.GetApiScopes())
                     .AddProfileService<FullNameProfileService>()
                     .AddResourceOwnerValidator<FileBasedResourceOwnerPasswordValidator>();
             }
@@ -141,6 +143,8 @@ namespace DoorRequest.API
             app.UseRouting();
 
             app.UseAuthentication();
+
+            app.UseAuthorization();
 
             app.UseIdentityServer();
 

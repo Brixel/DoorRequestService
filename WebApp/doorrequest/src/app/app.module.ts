@@ -1,70 +1,60 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { BrowserModule } from "@angular/platform-browser";
+import { NgModule, APP_INITIALIZER } from "@angular/core";
 
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { MainComponent } from './main.component';
-import { JwtModule, JwtHelperService } from '@auth0/angular-jwt';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { UserService } from './modules/core/services/user.service';
-import { AuthGuard } from './modules/core/services/auth.guard';
-import { AuthInterceptor } from './modules/core/services/auth-interceptor';
-import { ClientConfigurationService } from './modules/core/services/clientconfiguration.service';
-import { CoreModule } from './modules/core/core.module';
+import { AppRoutingModule } from "./app-routing.module";
+import { AppComponent } from "./app.component";
+import { MainComponent } from "./main.component";
+import { HttpClientModule } from "@angular/common/http";
+import { UserService } from "./modules/core/services/user.service";
+import { AuthGuard } from "./modules/core/services/auth.guard";
+import { ClientConfigurationService } from "./modules/core/services/clientconfiguration.service";
+import { CoreModule } from "./modules/core/core.module";
+import { OAuthModule } from "angular-oauth2-oidc";
 
-export function tokenGetter():string {
-  return localStorage.getItem('token');
+export function tokenGetter(): string {
+  return localStorage.getItem("token");
 }
 @NgModule({
-  declarations: [
-    AppComponent,
-    MainComponent
-  ],
+  declarations: [AppComponent, MainComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    JwtModule.forRoot({
-        config: {
-          tokenGetter,
-        },
+    OAuthModule.forRoot({
+      resourceServer: {
+        sendAccessToken: true,
+      },
     }),
-    CoreModule
+    CoreModule,
   ],
   providers: [
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [ClientConfigurationService],
-      multi: true
-  },
-    JwtHelperService,
-    AuthGuard,
-    {
-       provide: HTTP_INTERCEPTORS,
-       useClass: AuthInterceptor,
-       multi: true,
+      multi: true,
     },
+    AuthGuard,
     UserService,
-    BrowserAnimationsModule,],
-  bootstrap: [AppComponent]
+    BrowserAnimationsModule,
+  ],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 
-export function initializeApp(clientConfigurationService: ClientConfigurationService) {
+export function initializeApp(
+  clientConfigurationService: ClientConfigurationService
+) {
   return () => {
-      return clientConfigurationService
-          .load()
-          .subscribe(
-              (result) => {
-               },
-              (error) => {
-                console.log(error);
-                  alert('Failed to initialize application');
-              }
-          );
+    return clientConfigurationService.load().subscribe(
+      (result) => {},
+      (error) => {
+        console.log(error);
+        alert("Failed to initialize application");
+      }
+    );
   };
 }

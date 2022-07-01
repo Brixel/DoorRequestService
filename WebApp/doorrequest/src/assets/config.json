@@ -1,4 +1,4 @@
 {
-  "apiUri":"http://localhost:5001/",
-  "authUri": "http://localhost:5001/"
+  "apiUri": "https://localhost:5001/",
+  "authUri": "https://localhost:5001"
 }
