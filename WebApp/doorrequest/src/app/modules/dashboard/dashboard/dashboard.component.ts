@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormGroup, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 import { DoorService } from '../../core/services/door.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -12,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class DashboardComponent implements OnInit {
   setupImage: string;
-  form: FormGroup;
+  form: UntypedFormGroup;
   constructor(
     private doorService: DoorService,
     private authService: AuthService,
@@ -21,8 +21,8 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.form = new FormGroup({
-      validationKey: new FormControl('XXXXXX')
+    this.form = new UntypedFormGroup({
+      validationKey: new UntypedFormControl('XXXXXX')
     });
 
     this.authService.setupQRCode().subscribe(res => {
