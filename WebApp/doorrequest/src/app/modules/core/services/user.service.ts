@@ -1,15 +1,12 @@
-import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { JwtHelperService } from '@auth0/angular-jwt';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ClientConfigurationService } from './clientconfiguration.service';
+import { Injectable, Inject } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { JwtHelperService } from "@auth0/angular-jwt";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import { ClientConfigurationService } from "./clientconfiguration.service";
 
 @Injectable()
 export class UserService {
-  authUrl: string;
-  private tokenURL = this.authUrl + 'connect/token';
-  private userInfoURL = this.authUrl + 'connect/userinfo';
   constructor(
     private http: HttpClient,
     private jwtHelper: JwtHelperService,
@@ -17,44 +14,48 @@ export class UserService {
   ) {}
 
   getUserInfo(): Observable<any> {
-    return this.http.get(this.userInfoURL).pipe(map(res => res));
+    const authUrl =
+      this.clientConfigurationService.getClientConfiguration().authUri;
+    const userInfoURL = `${authUrl}/connect/userinfo`;
+    return this.http.get(userInfoURL).pipe(map((res) => res));
   }
 
   getTokenUrl() {
-    this.authUrl = this.clientConfigurationService.getClientConfiguration().authUri;
-    return this.authUrl + 'connect/token';
+    const authUrl =
+      this.clientConfigurationService.getClientConfiguration().authUri;
+    return `${authUrl}/connect/token`;
   }
 
   authenticate(username: string, password: string): Observable<any> {
     const headers = new HttpHeaders({
-      'Content-Type': 'application/x-www-form-urlencoded'
+      "Content-Type": "application/x-www-form-urlencoded",
     });
     const body = new URLSearchParams();
-    body.set('username', username);
-    body.set('password', password);
-    body.set('grant_type', 'password');
-    body.set('client_id', 'space-auth-client');
-    body.set('client_secret', 'secret');
+    body.set("username", username);
+    body.set("password", password);
+    body.set("grant_type", "password");
+    body.set("client_id", "space-auth-client");
+    body.set("client_secret", "secret");
     return this.http
       .post<any>(this.getTokenUrl(), body.toString(), {
-        headers
+        headers,
       })
       .pipe(
-        map(jwt => {
+        map((jwt) => {
           if (jwt && jwt.access_token) {
             const token = {
               access_token: jwt.access_token,
               expires_in: jwt.expires_in,
-              token_type: jwt.token_type
+              token_type: jwt.token_type,
             };
-            localStorage.setItem('token', JSON.stringify(token));
+            localStorage.setItem("token", JSON.stringify(token));
           }
         })
       );
   }
 
   isAuthenticated() {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     return !this.jwtHelper.isTokenExpired(token);
   }
 
@@ -63,6 +64,6 @@ export class UserService {
   }
 
   logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
   }
 }
