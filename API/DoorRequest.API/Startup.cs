@@ -1,4 +1,5 @@
-﻿using AspNetCore.Totp;
+﻿using System.Linq;
+using AspNetCore.Totp;
 using AspNetCore.Totp.Interface;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
@@ -10,21 +11,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace DoorRequest.API
 {
     public class Startup
     {
-        private readonly ILogger<Startup> _logger;
 
-        public Startup(IConfiguration configuration, ILogger<Startup> logger)
+        public Startup(IConfiguration configuration)
         {
-            _logger = logger;
             Configuration = configuration;
         }
 
@@ -33,10 +33,7 @@ namespace DoorRequest.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(typeof(ITelemetryChannel),
-                new ServerTelemetryChannel() { StorageFolder = "/logging" });
-            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllers();
             var identityConfiguration = 
                 Configuration.GetSection("IdentityConfiguration").Get<IdentityConfiguration>();
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
@@ -61,7 +58,6 @@ namespace DoorRequest.API
 
             if (hasLDAPConfiguration)
             {
-                _logger.LogInformation("Using LDAP based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
@@ -78,7 +74,6 @@ namespace DoorRequest.API
             }
             else
             {
-                _logger.LogInformation("Using file based authentication");
                 services.AddIdentityServer(options =>
                     {
                         options.Events.RaiseErrorEvents = true;
@@ -104,8 +99,7 @@ namespace DoorRequest.API
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
-
-            services.AddLogging();
+            
 ;
             var doorConfiguration = Configuration.GetSection("MQTTDoorConfiguration").Get<DoorConfiguration>();
             services.AddScoped<ITotpGenerator, TotpGenerator>();
@@ -124,10 +118,12 @@ namespace DoorRequest.API
             services.AddScoped<IDoorRequestService, DoorRequestService>();
             services.Configure<AccountKeyConfiguration>(Configuration.GetSection("AccountKeyConfiguration"));
             services.AddScoped<IAccountKeyService, AccountKeyService>();
+            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -138,22 +134,22 @@ namespace DoorRequest.API
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseSerilogRequestLogging();
+            //app.UseSerilogRequestLogging();
             // TODO Uncomment once connection to LDAP is over SSL
             //app.UseHttpsRedirection();
+
+            app.UseRouting();
 
             app.UseAuthentication();
 
             app.UseIdentityServer();
 
             app.UseCors("CorsPolicy");
+            
 
-
-            app.UseMvc(routes =>
+            app.UseEndpoints(routes =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=GetAboutVersion}/{id?}");
+                routes.MapControllers();
             });
         }
     }

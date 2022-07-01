@@ -9,7 +9,7 @@ namespace DoorRequest.API
     {
         public static string GenerateSaltedSHA1(string plainTextString)
         {
-            HashAlgorithm algorithm = new SHA1Managed();
+            HashAlgorithm algorithm = SHA1.Create();
             var saltBytes = GenerateSalt(4);
             var plainTextBytes = Encoding.ASCII.GetBytes(plainTextString);
 
@@ -32,7 +32,7 @@ namespace DoorRequest.API
 
         public static string GenerateSaltedSHA1(string plainTextString, byte[] saltBytes)
         {
-            HashAlgorithm algorithm = new SHA1Managed();
+            HashAlgorithm algorithm = SHA1.Create();
             var plainTextBytes = Encoding.UTF8.GetBytes(plainTextString);
 
             var plainTextWithSaltBytes = AppendByteArray(plainTextBytes, saltBytes);
@@ -45,7 +45,7 @@ namespace DoorRequest.API
 
         private static byte[] GenerateSalt(int saltSize)
         {
-            var rng = new RNGCryptoServiceProvider();
+            var rng = RandomNumberGenerator.Create();
             var buff = new byte[saltSize];
             rng.GetBytes(buff);
             return buff;
