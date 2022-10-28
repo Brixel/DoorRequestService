@@ -4,13 +4,15 @@ import { from, Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { ClientConfigurationService } from "./clientconfiguration.service";
 import { AuthConfig, OAuthService } from "angular-oauth2-oidc";
+import { Router } from "@angular/router";
 
 @Injectable()
 export class UserService {
   constructor(
     private http: HttpClient,
     private oauthService: OAuthService,
-    private clientConfigurationService: ClientConfigurationService
+    private clientConfigurationService: ClientConfigurationService,
+    private router: Router
   ) {
     this.fixAuthConfigWithClientConfiguration(authConfig);
     this.oauthService.configure(authConfig);
@@ -70,6 +72,7 @@ export class UserService {
 
   logout() {
     this.oauthService.logOut();
+    this.router.navigateByUrl("/login");
   }
 
   private fixAuthConfigWithClientConfiguration(authConfig: AuthConfig) {
