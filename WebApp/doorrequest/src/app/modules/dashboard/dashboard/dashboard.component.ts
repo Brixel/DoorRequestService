@@ -5,6 +5,7 @@ import { UntypedFormGroup, UntypedFormControl } from "@angular/forms";
 import { DoorService } from "../../core/services/door.service";
 import { AuthService } from "../../core/services/auth.service";
 import { UserService } from "../../core/services/user.service";
+import { tap } from "rxjs/operators";
 
 @Component({
   selector: "app-dashboard",
@@ -14,6 +15,7 @@ import { UserService } from "../../core/services/user.service";
 export class DashboardComponent implements OnInit {
   setupImage: string;
   form: UntypedFormGroup;
+  code: number;
 
   openDoor = true;
   constructor(
@@ -32,6 +34,14 @@ export class DashboardComponent implements OnInit {
     this.authService.setupQRCode().subscribe((res) => {
       this.setupImage = res.image;
     });
+    this.doorService
+      .getLockCode()
+      .pipe(
+        tap((code) => {
+          this.code = code;
+        })
+      )
+      .subscribe();
   }
   submit() {
     if (this.form.valid) {
