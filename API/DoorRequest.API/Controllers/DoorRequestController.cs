@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AspNetCore.Totp.Interface;
+using DoorRequest.API.Config;
 using DoorRequest.API.Services;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace DoorRequest.API.Controllers
 {
@@ -16,13 +18,15 @@ namespace DoorRequest.API.Controllers
         private readonly IDoorRequestService _doorRequestService;
         private readonly ITotpValidator _totpValidator;
         private readonly IAccountKeyService _accountKeyService;
+        private readonly LockConfiguration _lockConfiguration;
 
         public DoorRequestController(IDoorRequestService doorRequestService, ITotpValidator totpValidator, 
-            IAccountKeyService accountKeyService)
+            IAccountKeyService accountKeyService, IOptions<LockConfiguration> lockConfiguration)
         {
             _doorRequestService = doorRequestService;
             _totpValidator = totpValidator;
             _accountKeyService = accountKeyService;
+            _lockConfiguration = lockConfiguration.Value;
         }
 
         [HttpPost("open")]
@@ -35,6 +39,12 @@ namespace DoorRequest.API.Controllers
                 throw new Exception("Invalid validation token");
             }
             return await _doorRequestService.OpenDoor();
+        }
+
+        [HttpGet("code")]
+        public int GetLockCode()
+        {
+            return _lockConfiguration.Code;
         }
     }
 }

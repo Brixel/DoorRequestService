@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -33,6 +34,7 @@ namespace DoorRequest.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            IdentityModelEventSource.ShowPII = true;
             services.AddControllers();
             var identityConfiguration = 
                 Configuration.GetSection("IdentityConfiguration").Get<IdentityConfiguration>();
@@ -97,7 +99,8 @@ namespace DoorRequest.API
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
-                    builder => builder.AllowAnyOrigin()
+    builder => 
+                    builder.AllowAnyOrigin()
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
@@ -120,7 +123,8 @@ namespace DoorRequest.API
             services.AddScoped<IDoorRequestService, DoorRequestService>();
             services.Configure<AccountKeyConfiguration>(Configuration.GetSection("AccountKeyConfiguration"));
             services.AddScoped<IAccountKeyService, AccountKeyService>();
-            
+            services.Configure<LockConfiguration>(Configuration.GetSection(nameof(LockConfiguration)));
+
 
         }
 

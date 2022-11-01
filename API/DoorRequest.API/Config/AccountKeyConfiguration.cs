@@ -1,7 +1,6 @@
-﻿namespace DoorRequest.API.Config
+﻿namespace DoorRequest.API.Config;
+
+public class AccountKeyConfiguration
 {
-    public class AccountKeyConfiguration
-    {
-        public string SystemAccountKey { get; set; }
-    }
+    public string SystemAccountKey { get; set; }
 }
