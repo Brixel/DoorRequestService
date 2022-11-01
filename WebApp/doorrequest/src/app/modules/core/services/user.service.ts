@@ -88,5 +88,5 @@ export const authConfig: AuthConfig = {
   responseType: "code",
   scope: "space-auth.api",
   showDebugInformation: true,
-  requireHttps: "remoteOnly",
+  requireHttps: false,
 };
