@@ -32,7 +32,7 @@ namespace DoorRequest.API.Controllers
         [HttpPost("open")]
         public async Task<bool> OpenDoorRequest([FromBody]int validationCode)
         {
-            var user = User.GetSubjectId();
+            var user = User.GetSubjectId().Trim();
             var validationResult = _totpValidator.Validate(_accountKeyService.GetAccountKey(user), validationCode);
             if (!validationResult)
             {

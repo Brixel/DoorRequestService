@@ -32,7 +32,7 @@ namespace DoorRequest.API.Controllers
         [HttpGet("setup")]
         public SetupQRCodeDTO Setup()
         {
-            var user = User.GetSubjectId();
+            var user = User.GetSubjectId().Trim();
             var setup = _totpSetupGenerator.Generate("Brixel-Entry", user, 
                 _accountKeyService.GetAccountKey(user));
 
@@ -48,7 +48,7 @@ namespace DoorRequest.API.Controllers
         [HttpPost("validate")]
         public ValidatateSetupDTO Validate([FromBody]int validationCode)
         {
-            var user = User.GetSubjectId();
+            var user = User.GetSubjectId().Trim();
             _logger.LogInformation($"Validating entered code for {user}");
             var validationResult = _totpValidator.Validate(_accountKeyService.GetAccountKey(user), validationCode);
             return new ValidatateSetupDTO()
