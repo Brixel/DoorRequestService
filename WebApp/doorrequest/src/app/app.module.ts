@@ -12,6 +12,7 @@ import { AuthGuard } from "./modules/core/services/auth.guard";
 import { ClientConfigurationService } from "./modules/core/services/clientconfiguration.service";
 import { CoreModule } from "./modules/core/core.module";
 import { OAuthModule } from "angular-oauth2-oidc";
+import { tap } from "rxjs/operators";
 
 export function tokenGetter(): string {
   return localStorage.getItem("token");
@@ -49,12 +50,15 @@ export function initializeApp(
   clientConfigurationService: ClientConfigurationService
 ) {
   return () => {
-    return clientConfigurationService.load().subscribe(
-      (result) => {},
-      (error) => {
-        console.log(error);
-        alert("Failed to initialize application");
-      }
-    );
+    return clientConfigurationService
+      .load()
+      .pipe(tap(() => console.log("Load clientConfig")))
+      .subscribe(
+        (result) => {},
+        (error) => {
+          console.log(error);
+          alert("Failed to initialize application");
+        }
+      );
   };
 }
