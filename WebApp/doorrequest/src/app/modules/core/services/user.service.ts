@@ -15,9 +15,11 @@ export class UserService {
     private router: Router
   ) {
     this.fixAuthConfigWithClientConfiguration(authConfig);
-    this.oauthService.configure(authConfig);
-    this.oauthService.loadDiscoveryDocument();
-    this.oauthService.setStorage(sessionStorage);
+    clientConfigurationService.load().subscribe(() => {
+      this.oauthService.configure(authConfig);
+      this.oauthService.loadDiscoveryDocument();
+      this.oauthService.setStorage(sessionStorage);
+    });
   }
 
   getUserInfo(): Observable<any> {
