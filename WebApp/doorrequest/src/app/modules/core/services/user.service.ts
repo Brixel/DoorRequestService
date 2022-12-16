@@ -14,8 +14,8 @@ export class UserService {
     private clientConfigurationService: ClientConfigurationService,
     private router: Router
   ) {
-    this.fixAuthConfigWithClientConfiguration(authConfig);
     clientConfigurationService.load().subscribe(() => {
+      this.fixAuthConfigWithClientConfiguration(authConfig);
       this.oauthService.configure(authConfig);
       this.oauthService.loadDiscoveryDocument();
       this.oauthService.setStorage(sessionStorage);
