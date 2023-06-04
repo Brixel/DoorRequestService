@@ -1,39 +1,16 @@
 <mat-toolbar>
-  <button mat-raised-button color="primary" (click)="showOpenDoor()">
+  <button mat-raised-button color="primary">
     Open the door
   </button>
-  <button mat-raised-button (click)="showSetup()">Setup</button>
   <span class="example-spacer"></span>
   <button mat-flat-button color="accent" (click)="logout()">Logout</button>
 </mat-toolbar>
-<mat-card *ngIf="openDoor">
+<mat-card>
   <mat-card-title>Open the door</mat-card-title>
   <mat-card-content>
-    <form novalidate [formGroup]="form" (ngSubmit)="submit()">
-      <mat-form-field>
-        <input
-          matInput
-          formControlName="validationKey"
-          class="form-control"
-          type="number"
-          placeholder="Code"
-        />
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit">
+      <button mat-raised-button color="primary" *ngIf="canOpenDoor$ | async">
         Open the door
       </button>
-    </form>
-    <p>Code sleutelkast: {{ code }}</p>
-  </mat-card-content>
-</mat-card>
-<mat-card *ngIf="!openDoor">
-  <mat-card-title> Setup authenticator app </mat-card-title>
-  <mat-card-content>
-    <p>
-      Scan the following QR code with your OTP application (Google
-      Authenticator, Authy, Microsoft Authenticator, ...) or your password
-      manager with support for TOTP
-    </p>
-    <img *ngIf="setupImage" [src]="setupImage" />
+    <p *ngIf="canSeeCode$ | async">Code sleutelkast: {{ code$ | async }}</p>
   </mat-card-content>
 </mat-card>

@@ -1,19 +1,22 @@
-import { Inject, Injectable } from "@angular/core";
-import { DoorRequestProxy } from "./doorrequest.proxy";
-import { map } from "rxjs/operators";
+import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { HttpClient } from "@angular/common/http";
+import { environment } from "../../../../environments/environment";
 
 @Injectable()
 export class DoorService {
-  constructor(private doorRequestProxy: DoorRequestProxy) {}
+  baseUri = environment.apiService;
 
-  openDoorRequest(validationNumber: number): Observable<boolean> {
-    return this.doorRequestProxy
-      .openDoorRequest(validationNumber)
-      .pipe(map((res) => res));
+  constructor(private httpClient: HttpClient) {}
+
+  openDoorRequest(): Observable<null> {
+    return this.httpClient.post<null>(
+      `${this.baseUri}/api/doorrequest/open`,
+      null
+    );
   }
 
-  getLockCode() {
-    return this.doorRequestProxy.getLockCode();
+  getLockCode(): Observable<number> {
+    return this.httpClient.get<number>(`${this.baseUri}/api/doorrequest/code`);
   }
 }
