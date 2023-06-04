@@ -1,7 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
-using DoorRequest.API.Authorization;
+﻿using DoorRequest.API.Authorization;
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +11,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()

@@ -7,8 +7,8 @@ public class AuthenticationConfiguration
     public const string SectionName = "Authentication";
 
     [Required(AllowEmptyStrings = false)]
-    public string Authority {get;set;}
+    public string Authority { get; set; }
 
     [Required(AllowEmptyStrings = false)]
-    public string Audience {get;set;} = "door-request-api";
+    public string Audience { get; set; } = "door-request-api";
 }

@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace DoorRequest.API.Services
+namespace DoorRequest.API.Services;
+
+public interface IDoorRequestService
 {
-    public interface IDoorRequestService
-    {
-        Task<bool> OpenDoor();
-    }
+    Task<bool> OpenDoor();
 }

@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace DoorRequest.API.Services
+namespace DoorRequest.API.Services;
+
+public interface IBrixelOpenDoorClient
 {
-    public interface IBrixelOpenDoorClient
-    {
-        Task<bool> OpenDoor();
-    }
+    Task<bool> OpenDoor();
 }
