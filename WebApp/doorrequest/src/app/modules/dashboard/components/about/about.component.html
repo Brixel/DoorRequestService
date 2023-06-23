@@ -1,0 +1,54 @@
+<mat-card>
+  <mat-card-header>
+    <h1>Hi, developer, happy debugging 🐞!</h1>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngIf="authService.idToken">
+      <h2>Authenticated?</h2>
+      <p>{{ authService.isAuthenticated$ | async }}</p>
+      <h2>User</h2>
+      <p>{{ authService.userName }}</p>
+
+      <h2>Id-Token</h2>
+      <p>{{ authService.idToken }}</p>
+
+      <h2>Access Token</h2>
+      <p>{{ authService.accessToken }}</p>
+
+      <h2>Roles</h2>
+      <div>
+        <ul>
+          <li *ngFor="let role of authService.roles$ | async">
+            role: {{ role }}
+          </li>
+        </ul>
+      </div>
+      <h2>Claims</h2>
+      <div>
+        <ul>
+          <li *ngFor="let claim of authService.claims$ | async | keyvalue">
+            claim: {{ claim.key }}: {{ claim.value }}
+          </li>
+        </ul>
+      </div>
+      <h2>Timestamps</h2>
+      <div>
+        <ul>
+          <li>
+            ID Token expiry t/s:
+            {{ authService.idTokenExpiresAt | date : "short" }}
+          </li>
+          <li>
+            Access Token expiry t/s:
+            {{ authService.accessTokenExpiresAt | date : "short" }}
+          </li>
+        </ul>
+        <p>Time till expiration: {{ $tokenExpiryCounter | async }}</p>
+      </div>
+      <p>
+        <button (click)="authService.refreshToken()">Refresh</button>
+      </p>
+      <p><button (click)="authService.logout()">Logout</button></p>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,23 +1,21 @@
-﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using MQTTnet;
+﻿using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
-namespace DoorRequest.API.Services
+namespace DoorRequest.API.Services;
+
+public class DoorRequestService : IDoorRequestService
 {
-    public class DoorRequestService : IDoorRequestService
-    {
-        private readonly IBrixelOpenDoorClient _brixelOpenDoorClient;
-        private readonly ILogger _logger;
+    private readonly IBrixelOpenDoorClient _brixelOpenDoorClient;
+    private readonly ILogger _logger;
 
-        public DoorRequestService(IBrixelOpenDoorClient brixelOpenDoorClient, ILogger<DoorRequestService> logger)
-        {
-            _brixelOpenDoorClient = brixelOpenDoorClient;
-            _logger = logger;
-        }
-        public async Task<bool> OpenDoor()
-        {
-            _logger.LogInformation("Sending request to open the door via MQTT");
-            return await _brixelOpenDoorClient.OpenDoor();
-        }
+    public DoorRequestService(IBrixelOpenDoorClient brixelOpenDoorClient, ILogger<DoorRequestService> logger)
+    {
+        _brixelOpenDoorClient = brixelOpenDoorClient;
+        _logger = logger;
+    }
+    public async Task<bool> OpenDoor()
+    {
+        _logger.LogInformation("Sending request to open the door via MQTT");
+        return await _brixelOpenDoorClient.OpenDoor();
     }
 }

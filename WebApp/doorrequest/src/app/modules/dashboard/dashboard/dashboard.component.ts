@@ -1,11 +1,10 @@
-import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { UntypedFormGroup, UntypedFormControl } from "@angular/forms";
 import { DoorService } from "../../core/services/door.service";
-import { AuthService } from "../../core/services/auth.service";
-import { UserService } from "../../core/services/user.service";
-import { tap } from "rxjs/operators";
+import { AuthService, Roles } from "../../core/services/auth.service";
+import { take } from "rxjs/operators";
+import { Observable } from "rxjs";
 
 @Component({
   selector: "app-dashboard",
@@ -13,64 +12,42 @@ import { tap } from "rxjs/operators";
   styleUrls: ["./dashboard.component.scss"],
 })
 export class DashboardComponent implements OnInit {
-  setupImage: string;
-  form: UntypedFormGroup;
-  code: number;
+  code$: Observable<number>;
+  canOpenDoor$: Observable<boolean>;
+  canSeeCode$: Observable<boolean>;
 
-  openDoor = true;
   constructor(
     private doorService: DoorService,
     private authService: AuthService,
-    private userService: UserService,
     public dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) {
+    this.code$ = doorService.getLockCode();
+    this.canOpenDoor$ = this.authService.hasRoles$([
+      Roles.TwentyFourSevenAccess,
+    ]);
+    this.canSeeCode$ = this.authService.hasRoles$([Roles.KeyVaultCode]);
+  }
 
-  ngOnInit() {
-    this.form = new UntypedFormGroup({
-      validationKey: new UntypedFormControl("XXXXXX"),
-    });
+  ngOnInit() {}
 
-    this.authService.setupQRCode().subscribe((res) => {
-      this.setupImage = res.image;
-    });
+  opendoor() {
     this.doorService
-      .getLockCode()
-      .pipe(
-        tap((code) => {
-          this.code = code;
-        })
-      )
-      .subscribe();
-  }
-  submit() {
-    if (this.form.valid) {
-      const validationKey = this.form.get("validationKey");
-      const validationNumber = Number(validationKey.value);
-      if (!isNaN(validationNumber)) {
-        this.doorService.openDoorRequest(validationNumber).subscribe(
-          (res) =>
-            this.snackBar.open("Request to open the door has been sent", "OK", {
-              duration: 2000,
-              verticalPosition: "top",
-            }),
-          (error) => {
-            this.snackBar.open("Failed to request to open the door", "OK");
-          }
-        );
-      }
-    }
-  }
-
-  showOpenDoor() {
-    this.openDoor = true;
-  }
-
-  showSetup() {
-    this.openDoor = false;
+      .openDoorRequest()
+      .pipe(take(1))
+      .subscribe(
+        (res) =>
+          this.snackBar.open("Request to open the door has been sent", "OK", {
+            duration: 2000,
+            verticalPosition: "top",
+          }),
+        (error) => {
+          this.snackBar.open("Failed to request to open the door", "OK");
+        }
+      );
   }
 
   logout() {
-    this.userService.logout();
+    this.authService.logout();
   }
 }

@@ -1,18 +1,13 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { NgModule, APP_INITIALIZER } from "@angular/core";
-
+import { NgModule } from "@angular/core";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { MainComponent } from "./main.component";
 import { HttpClientModule } from "@angular/common/http";
-import { UserService } from "./modules/core/services/user.service";
 import { AuthGuard } from "./modules/core/services/auth.guard";
-import { ClientConfigurationService } from "./modules/core/services/clientconfiguration.service";
 import { CoreModule } from "./modules/core/core.module";
 import { OAuthModule } from "angular-oauth2-oidc";
-import { tap } from "rxjs/operators";
 
 export function tokenGetter(): string {
   return localStorage.getItem("token");
@@ -31,34 +26,7 @@ export function tokenGetter(): string {
     }),
     CoreModule,
   ],
-  providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeApp,
-      deps: [ClientConfigurationService],
-      multi: true,
-    },
-    AuthGuard,
-    UserService,
-    BrowserAnimationsModule,
-  ],
+  providers: [AuthGuard, BrowserAnimationsModule],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
-
-export function initializeApp(
-  clientConfigurationService: ClientConfigurationService
-) {
-  return () => {
-    return clientConfigurationService
-      .load()
-      .pipe(tap(() => console.log("Load clientConfig")))
-      .subscribe(
-        (result) => {},
-        (error) => {
-          console.log(error);
-          alert("Failed to initialize application");
-        }
-      );
-  };
-}
