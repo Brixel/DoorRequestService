@@ -1,5 +1,10 @@
 <mat-toolbar>
-  <button mat-raised-button color="primary">
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="opendoor()"
+    *ngIf="canOpenDoor$ | async"
+  >
     Open the door
   </button>
   <span class="example-spacer"></span>
@@ -8,9 +13,9 @@
 <mat-card>
   <mat-card-title>Open the door</mat-card-title>
   <mat-card-content>
-      <button mat-raised-button color="primary" *ngIf="canOpenDoor$ | async">
-        Open the door
-      </button>
+    <button mat-raised-button color="primary" *ngIf="canOpenDoor$ | async">
+      Open the door
+    </button>
     <p *ngIf="canSeeCode$ | async">Code sleutelkast: {{ code$ | async }}</p>
   </mat-card-content>
 </mat-card>
