@@ -23,9 +23,9 @@ else
     echo "CLIENTID found: $CLIENTID"
 fi
 
-sed -i "s/apiService: ""/apiService: $APISERVICE/g" /usr/share/nginx/html/main.*.js
-sed -i "s/issuer: ""/issuer: $ISSUER/g" /usr/share/nginx/html/main.*.js
-sed -i "s/clientId: ""/clientId: $CLIENTID/g" /usr/share/nginx/html/main.*.js
+sed -i "s/apiService:\"\"/apiService:\"$APISERVICE\"/g" /usr/share/nginx/html/main.*.js
+sed -i "s/issuer:\"\"/issuer:\"$ISSUER\"/g" /usr/share/nginx/html/main.*.js
+sed -i "s/clientId:\"\"/clientId:\"$CLIENTID\"/g" /usr/share/nginx/html/main.*.js
 
 echo "Starting nginx..."
 nginx -g "daemon off;"
