@@ -1,9 +1,26 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoorRequest.API", "API\DoorRequest.API\DoorRequest.API.csproj", "{263FC65F-673F-42AF-BBDC-7D194BCF58AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{CC45F04F-0025-46C0-B8D9-5072C68FD717}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{1CD813E1-F654-4340-8DCA-0935FBBA9EE2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Keycloak", "Keycloak", "{C695FD5A-7CC3-4226-A8C4-7C89EA489FA6}"
+	ProjectSection(SolutionItems) = preProject
+		Infrastructure\Keycloak\DevRealm.json = Infrastructure\Keycloak\DevRealm.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mosquitto", "Mosquitto", "{13A6DFE6-8ADB-4493-91C3-48803473E3E1}"
+	ProjectSection(SolutionItems) = preProject
+		Infrastructure\Mosquitto\config\mosquitto.conf = Infrastructure\Mosquitto\config\mosquitto.conf
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

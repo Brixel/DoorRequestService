@@ -48,6 +48,7 @@ try
     }).AddJwtBearer(o =>
     {
         o.Authority = authOptions.Authority;
+        o.RequireHttpsMetadata = !authOptions.Authority.Contains("localhost");
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

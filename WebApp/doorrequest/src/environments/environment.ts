@@ -6,8 +6,9 @@ export const environment = {
   production: false,
   apiService: "https://localhost:5001",
   oAuth: {
-    issuer: "",
-    clientId: "",
+    issuer: "http://localhost:5302/realms/DevRealm",
+    clientId: "door-request-webapp",
+    requireHttps: false
   },
 };
 

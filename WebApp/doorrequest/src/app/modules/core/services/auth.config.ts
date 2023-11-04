@@ -7,7 +7,7 @@ export const authConfig: AuthConfig = {
   clientId: environment.oAuth.clientId,
   responseType: "code",
   scope: "openid",
-  requireHttps: true,
+  requireHttps: environment.oAuth.requireHttps ?? true,
   showDebugInformation: environment.production ? false : true,
   strictDiscoveryDocumentValidation: true,
 };
