@@ -1,13 +1,44 @@
-version: '3.0'
+version: '3.4'
 
 services:
-  ldap:
-    container_name: openldap
-    image: osixia/openldap:latest
-    ports:
-      - "389:389"
-      - "636:636"
-    env_file:
-      - ./ldap.env
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+      SA_PASSWORD: Dev-db-Password
+      ACCEPT_EULA: "Y"
     volumes:
-      - ./ldap:/data/ldif
+      - ./.dev/mssql/data:/var/opt/mssql/data
+    ports:
+      - 5301:1433
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:19.0.3
+    depends_on:
+      - db
+    environment:
+      TZ: Europe/Brussels
+      KEYCLOAK_IMPORT: /tmp/DevRealm.json
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+      KC_DB_PASSWORD: Dev-db-Password
+      KC_DB_USERNAME: sa
+      KC_DB_URL_HOST: db
+      KC_PROXY: edge
+      KC_DB_URL_DATABASE: HaSpMan
+    ports:
+      - 5302:8080
+    volumes:
+      - ./Infrastructure/Keycloak/DevRealm.json:/opt/keycloak/data/import/DevRealm.json
+    command:
+      - start-dev
+      - --import-realm
+  eclipse-mosquitto:
+    stdin_open: true
+    tty: true
+    ports:
+      - '5303:1883'
+    image: eclipse-mosquitto
+    volumes:
+      -   ./Infrastructure/Mosquitto/config:/mosquitto/config
