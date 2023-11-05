@@ -1,0 +1,66 @@
+﻿@inherits LayoutComponentBase
+
+
+<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="_currentTheme" />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h5" Class="ml-3">DoorApp</MudText>
+        <MudSpacer />
+        <LoginDisplay />
+        <MudIconButton Icon="@Icons.Material.Filled.Brightness4"
+                       Color="Color.Secondary"
+                       Class="nav-button"
+                       OnClick="@ThemeToggle" />
+    </MudAppBar>
+    <MudMainContent class="mt-10">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _isDarkMode;
+
+    private MudThemeProvider _mudThemeProvider = default!;
+
+    private readonly MudTheme _currentTheme = new()
+        {
+            Palette = new PaletteLight
+            {
+                Primary = "#0A7BCF",
+                Secondary = "#4CAF50",
+                Info = "#64a7e2",
+                Success = "#2ECC40",
+                Warning = "#FFC107",
+                Error = "#FF0000",
+                AppbarBackground = "#212121",
+                TextPrimary = "#0A7BCF",
+                TextSecondary = "#4CAF50",
+                // more color properties
+            },
+            PaletteDark = new PaletteDark
+            {
+                Primary = "00BFFF",
+                Secondary = "#800080",
+                Info = "#4169E1",
+                Success = "#32CD32",
+                Warning = "#FFA500",
+                Error = "#FF0000",
+                AppbarBackground = "#121212",
+                TextPrimary = "#E0E0E0",
+                TextSecondary = "#BDBDBD",
+                // more color properties
+            }
+        };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            StateHasChanged();
+        }
+    }
+
+    void ThemeToggle() => _isDarkMode = !_isDarkMode;
+}

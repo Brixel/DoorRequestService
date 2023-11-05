@@ -1,4 +1,4 @@
-namespace DoorRequest.API.Authorization;
+namespace Shared.Authorization;
 
 public static class Roles
 {

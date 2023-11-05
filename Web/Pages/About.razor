@@ -1,0 +1,78 @@
+﻿@page "/about"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Globalization
+@using global::Shared.Authorization;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>About</h1>
+
+<p>@authMessage</p>
+
+<p>
+    Current culture: @CultureInfo.CurrentUICulture 
+</p>
+
+<p>
+    <MudButton Href="Account/Logout"
+           Variant="Variant.Filled"
+           EndIcon="@Icons.Material.Filled.Logout"
+           Color="Color.Primary">
+        Logout
+    </MudButton>
+</p>
+
+<h2>Claims</h2>
+
+<p>
+    @if (claims.Count() > 0)
+    {
+        <ul>
+            @foreach (var claim in claims)
+            {
+                <li>@claim.Type: @claim.Value</li>
+            }
+        </ul>
+    }
+</p>
+
+<h2>Roles</h2>
+
+<p>
+    @if (roles.Count() > 0)
+    {
+        <ul>
+            @foreach (var role in roles)
+            {
+                <li>@role</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <span>No roles found.</span>
+    }
+</p>
+
+@code {
+    private string? authMessage;
+    private IEnumerable<Claim> claims = Enumerable.Empty<Claim>();
+    private IEnumerable<string> roles = Enumerable.Empty<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user?.Identity?.IsAuthenticated ?? false)
+        {
+            authMessage = $"{user.Identity.Name} is authenticated.";
+            claims = user.Claims;
+            roles = user.Claims.Where(c => c.Type == CustomClaims.Roles).Select(c => c.Value);
+        }
+        else
+        {
+            authMessage = "The user is NOT authenticated.";
+        }
+    }
+}

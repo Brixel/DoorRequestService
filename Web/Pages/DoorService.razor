@@ -1,0 +1,10 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization;
+@using global::Shared.Authorization;
+@attribute [Authorize(Roles = Roles.TwentyFourSevenAccess)]
+
+<h3>DoorService</h3>
+
+@code {
+
+}
