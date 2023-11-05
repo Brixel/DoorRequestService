@@ -16,7 +16,7 @@ public class DoorService : IDoorService
 {
     private readonly string _topic;
     private readonly MqttClientOptions _options;
-    private ILogger<DoorService> _logger;
+    private readonly ILogger<DoorService> _logger;
 
     public DoorService(IOptions<DoorConfiguration> options, ILogger<DoorService> logger)
     {
