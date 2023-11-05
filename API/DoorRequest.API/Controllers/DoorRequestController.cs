@@ -12,12 +12,12 @@ namespace DoorRequest.API.Controllers;
 [Authorize]
 public class DoorRequestController : ControllerBase
 {
-    private readonly IDoorRequestService _doorRequestService;
+    private readonly IDoorService _doorService;
     private readonly LockConfiguration _lockConfiguration;
 
-    public DoorRequestController(IDoorRequestService doorRequestService, IOptions<LockConfiguration> lockConfiguration)
+    public DoorRequestController(IDoorService doorService, IOptions<LockConfiguration> lockConfiguration)
     {
-        _doorRequestService = doorRequestService;
+        _doorService = doorService ?? throw new System.ArgumentNullException(nameof(doorService));
         _lockConfiguration = lockConfiguration.Value;
     }
 
@@ -25,7 +25,7 @@ public class DoorRequestController : ControllerBase
     [Authorize(Roles = Authorization.Roles.TwentyFourSevenAccess)]
     public async Task<bool> OpenDoorRequest()
     {
-        return await _doorRequestService.OpenDoor();
+        return await _doorService.OpenDoor();
     }
 
     [HttpGet("code")]

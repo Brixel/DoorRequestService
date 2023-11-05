@@ -1,5 +1,6 @@
 ﻿
 using DoorRequest.API.Config;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
@@ -11,12 +12,13 @@ using System.Threading.Tasks;
 
 namespace DoorRequest.API.Services;
 
-public class BrixelOpenDoorClient : IBrixelOpenDoorClient
+public class DoorService : IDoorService
 {
     private readonly string _topic;
     private readonly MqttClientOptions _options;
+    private ILogger<DoorService> _logger;
 
-    public BrixelOpenDoorClient(IOptions<DoorConfiguration> options)
+    public DoorService(IOptions<DoorConfiguration> options, ILogger<DoorService> logger)
     {
         _topic = options.Value.Topic;
         var optionsBuilder = new MqttClientOptionsBuilder()
@@ -44,10 +46,12 @@ public class BrixelOpenDoorClient : IBrixelOpenDoorClient
         }
 
         _options = optionsBuilder.Build();
+        _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
     }
 
     public async Task<bool> OpenDoor()
     {
+        _logger.LogInformation("Sending request to open the door via MQTT");
         using var mqttClient = new MqttFactory().CreateMqttClient();
         await mqttClient.ConnectAsync(_options, CancellationToken.None);
         var message = new MqttApplicationMessageBuilder()

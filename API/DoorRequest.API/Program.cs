@@ -82,8 +82,7 @@ try
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
-    builder.Services.AddScoped<IBrixelOpenDoorClient, BrixelOpenDoorClient>();
-    builder.Services.AddScoped<IDoorRequestService, DoorRequestService>();
+    builder.Services.AddScoped<IDoorService, DoorService>();
     builder.Services.Configure<LockConfiguration>(builder.Configuration.GetSection(nameof(LockConfiguration)));
 
     var app = builder.Build();
