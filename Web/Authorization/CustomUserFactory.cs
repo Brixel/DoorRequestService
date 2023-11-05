@@ -29,7 +29,7 @@ public class CustomUserFactory : AccountClaimsPrincipalFactory<RemoteUserAccount
         return user;
     }
 
-    private void MapArrayClaimsToMultipleSeparateClaims(RemoteUserAccount account, ClaimsIdentity claimsIdentity)
+    private static void MapArrayClaimsToMultipleSeparateClaims(RemoteUserAccount account, ClaimsIdentity claimsIdentity)
     {
         foreach (var prop in account.AdditionalProperties)
         {

@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-using MudBlazor.Services;
-
 using Shared.Authorization;
 
 using Web;
 using Web.Authorization;
+using Web.Extensions;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -20,11 +19,10 @@ builder.Services.AddOidcAuthentication(options =>
     // For more information, see https://aka.ms/blazor-standalone-auth
     builder.Configuration.Bind("Local", options.ProviderOptions);
     options.UserOptions.RoleClaim = CustomClaims.Roles;
-});
+}).AddAccountClaimsPrincipalFactory<CustomUserFactory>();
 
-builder.Services.AddApiAuthorization()
-    .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
+builder.Services.AddMudBlazor();
 
-builder.Services.AddMudServices();
+builder.Services.AddDoorService();
 
 await builder.Build().RunAsync();

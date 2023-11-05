@@ -1,0 +1,24 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization;
+@using Web.Services;
+@using global::Shared.Authorization;
+@attribute [Authorize(Roles = Roles.TwentyFourSevenAccess)]
+
+<h3>DoorService</h3>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" @onclick="OpenDoor">Buzz me in!</MudButton>
+
+@code {
+    [Inject]
+    private IDoorService DoorService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    public async Task OpenDoor()
+    {
+        await DoorService.OpenDoor(CancellationToken.None);
+        Snackbar.Add("Door buzzer triggered successfully!", Severity.Success);
+    }
+
+}
