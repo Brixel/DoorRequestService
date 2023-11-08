@@ -2,16 +2,35 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject NavigationManager Navigation
 
-<AuthorizeView>
-    <Authorized>
-        Hello, @context.User.Identity?.Name!
-        <MudButton @onclick="BeginLogOut" Color="Color.Secondary" Variant="Variant.Text">Log out</MudButton>
+<MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
+    <MudMenu Icon="@Icons.Material.Filled.Person" Color="Color.Secondary" Class="nav-button">
+        <AuthorizeView>
+            <Authorized>
+                <MudMenuItem>Hello, @context.User.Identity?.Name!</MudMenuItem>
+                <MudMenuItem OnClick="BeginLogOut" OnTouch="BeginLogOut" Icon="@Icons.Material.Filled.Logout" IconColor="Color.Primary">
+                    Log out
+                </MudMenuItem>
+            </Authorized>
+            <NotAuthorized>
+                <MudMenuItem Href="authentication/login" Icon="@Icons.Material.Filled.Login" IconColor="Color.Primary">
+                    Log in
+                </MudMenuItem>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudMenu>
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.Xs">
+    <AuthorizeView>
+        <Authorized>
+            Hello, @context.User.Identity?.Name!
+            <MudButton @onclick="BeginLogOut" Color="Color.Secondary" Variant="Variant.Text">Log out</MudButton>
 
-    </Authorized>
-    <NotAuthorized>
-        <MudButton Href="authentication/login" Color="Color.Primary" Variant="Variant.Text">Log in</MudButton>
-    </NotAuthorized>
-</AuthorizeView>
+        </Authorized>
+        <NotAuthorized>
+            <MudButton Href="authentication/login" Color="Color.Primary" Variant="Variant.Text">Log in</MudButton>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudHidden>
 
 @code {
     private void BeginLogOut()
