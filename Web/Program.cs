@@ -23,6 +23,6 @@ builder.Services.AddOidcAuthentication(options =>
 
 builder.Services.AddMudBlazor();
 
-builder.Services.AddDoorService();
+builder.Services.AddDoorService(builder.Configuration);
 
 await builder.Build().RunAsync();
