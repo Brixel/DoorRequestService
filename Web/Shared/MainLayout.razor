@@ -1,13 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
-
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="_currentTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h5" Class="ml-3">DoorApp</MudText>
+        <a href="/">
+            <MudText Typo="Typo.h5" Class="ml-3">@Title</MudText>
+        </a>
         <MudSpacer />
         <LoginDisplay />
         <MudIconButton Icon="@Icons.Material.Filled.Brightness4"
@@ -21,9 +22,13 @@
 </MudLayout>
 
 @code {
+    private string Title = "DoorApp";
     private bool _isDarkMode;
 
     private MudThemeProvider _mudThemeProvider = default!;
+
+    [Inject]
+    private IConfiguration Configuration { get; set; } = default!;
 
     private readonly MudTheme _currentTheme = new()
         {
@@ -37,8 +42,7 @@
                 Error = "#FF0000",
                 AppbarBackground = "#212121",
                 TextPrimary = "#0A7BCF",
-                TextSecondary = "#4CAF50",
-                // more color properties
+                TextSecondary = "#4CAF50"
             },
             PaletteDark = new PaletteDark
             {
@@ -50,13 +54,13 @@
                 Error = "#FF0000",
                 AppbarBackground = "#121212",
                 TextPrimary = "#E0E0E0",
-                TextSecondary = "#BDBDBD",
-                // more color properties
+                TextSecondary = "#BDBDBD"
             }
         };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        Title = Configuration.GetValue<string>("AppName") ?? "DoorApp";
         if (firstRender)
         {
             _isDarkMode = await _mudThemeProvider.GetSystemPreference();
