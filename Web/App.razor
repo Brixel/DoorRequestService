@@ -5,7 +5,8 @@
                 <NotAuthorized>
                     @if (context.User.Identity?.IsAuthenticated != true)
                     {
-                        <RedirectToLogin />
+
+                        <MudText>Please log in</MudText>
                     }
                     else
                     {
