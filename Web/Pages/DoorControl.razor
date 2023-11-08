@@ -1,24 +1,94 @@
 ﻿@page "/"
+
 @using Microsoft.AspNetCore.Authorization;
 @using Web.Services;
 @using global::Shared.Authorization;
+
+@implements IDisposable;
+
+@inject IDoorService DoorService;
+@inject ISnackbar Snackbar;
+@inject IJSRuntime JsRuntime;
+
 @attribute [Authorize(Roles = Roles.TwentyFourSevenAccess)]
 
-<h3>DoorService</h3>
-
-<MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" @onclick="OpenDoor">Buzz me in!</MudButton>
+<div class="mb-2">
+    <MudButton Disabled="OpeningDoor || !IsOnline" Variant="Variant.Filled" Size="Size.Large" Color="Color.Primary" FullWidth="true" @onclick="OpenDoor">
+        @if (OpeningDoor)
+        {
+            <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+            <MudText>Opening door...</MudText>
+        }
+        else
+        {
+            <MudText>Buzz me in!</MudText>
+        }
+    </MudButton>
+</div>
+<div>
+    <AuthorizeView Roles="@Roles.KeyVaultCodeAccess">
+        <MudCard Outlined="true">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Key vault code</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (KeyVaultCode is null)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                }
+                else
+                {
+                    <MudText>@KeyVaultCode</MudText>
+                }
+            </MudCardContent>
+        </MudCard>
+    </AuthorizeView>
+</div>
 
 @code {
-    [Inject]
-    private IDoorService DoorService { get; set; } = default!;
+    private int? KeyVaultCode { get; set; }
 
-    [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
+    private bool OpeningDoor;
+    private bool IsOnline;
 
     public async Task OpenDoor()
     {
+        OpeningDoor = true;
         await DoorService.OpenDoor(CancellationToken.None);
         Snackbar.Add("Door buzzer triggered successfully!", Severity.Success);
+        OpeningDoor = false;
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        KeyVaultCode = await DoorService.GetCode(CancellationToken.None);
+    }
+
+    [JSInvokable("Connection.StatusChanged")]
+    public void OnConnectionStatusChanged(bool isOnline)
+    {
+        if (IsOnline != isOnline)
+        {
+            IsOnline = isOnline;
+        }
+
+        if (!IsOnline)
+            Snackbar.Add("Lost network connection", Severity.Error);
+
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        JsRuntime.InvokeVoidAsync("Connection.Initialize", DotNetObjectReference.Create(this));
+    }
+
+    public void Dispose()
+    {
+        JsRuntime.InvokeVoidAsync("Connection.Dispose");
+    }
 }

@@ -1,7 +1,10 @@
-﻿namespace Web.Services;
+﻿using System.Net.Http.Json;
+
+namespace Web.Services;
 
 public interface IDoorService
 {
+    Task<int> GetCode(CancellationToken ct);
     Task OpenDoor(CancellationToken ct);
 }
 
@@ -19,4 +22,7 @@ public class DoorService : IDoorService
         var response = await _httpClient.PostAsync("open", null, ct);
         response.EnsureSuccessStatusCode();
     }
+
+    public Task<int> GetCode(CancellationToken ct)
+        => _httpClient.GetFromJsonAsync<int>("code", ct);
 }
