@@ -73,15 +73,6 @@ try
             .Build();
     });
 
-    builder.Services.AddCors(options =>
-    {
-        //TODO: Fix CORS
-        options.AddPolicy("CorsPolicy", builder =>
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-    });
-
     builder.Services.AddOptions<DoorConfiguration>()
         .Bind(builder.Configuration.GetSection(DoorConfiguration.SectionName))
         .ValidateDataAnnotations()
@@ -100,7 +91,11 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseCors("CorsPolicy");
+    app.UseCors(builder =>
+        //TODO: Fix CORS
+        builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
     app.UseAuthentication();
     app.UseAuthorization();
