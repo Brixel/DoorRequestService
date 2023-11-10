@@ -42,6 +42,6 @@ jobs:
         with:
           context: .
           push: true
-          file: API\DoorRequest.API\Dockerfile
+          file: API/DoorRequest.API/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
