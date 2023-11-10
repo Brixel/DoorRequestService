@@ -37,6 +37,7 @@ try
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddControllers();
+    builder.Services.AddHealthChecks();
 
     var authOptions = builder.Configuration.GetSection(AuthenticationConfiguration.SectionName).Get<AuthenticationConfiguration>();
 
@@ -105,6 +106,7 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapHealthChecks("/healthz");
 
     app.Run();
 }
