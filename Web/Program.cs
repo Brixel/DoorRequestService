@@ -6,6 +6,7 @@ using Shared.Authorization;
 using Web;
 using Web.Authorization;
 using Web.Extensions;
+using Web.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -23,6 +24,9 @@ builder.Services.AddOidcAuthentication(options =>
 
 builder.Services.AddMudBlazor();
 
-builder.Services.AddDoorService(builder.Configuration);
+builder.Services.ConfigureApiOptions(builder.Configuration);
+builder.Services.AddDoorService();
+builder.Services.AddApiService();
+builder.Services.AddSingleton<IConnectionStatusService, ConnectionStatusService>();
 
 await builder.Build().RunAsync();

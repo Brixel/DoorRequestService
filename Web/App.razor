@@ -1,4 +1,7 @@
-﻿<CascadingAuthenticationState>
+﻿@using Web.Services;
+@inject IConnectionStatusService ConnectionStatusService;
+
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
@@ -24,3 +27,10 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ConnectionStatusService.StartPeriodicChecks(CancellationToken.None);
+    }
+} 

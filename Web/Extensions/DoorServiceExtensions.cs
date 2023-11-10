@@ -10,12 +10,8 @@ namespace Web.Extensions;
 
 public static class DoorServiceExtensions
 {
-    public static void AddDoorService(this IServiceCollection services, IConfiguration configuration)
+    public static void AddDoorService(this IServiceCollection services)
     {
-        services.AddOptions<ApiConfiguration>()
-           .Bind(configuration.GetSection(ApiConfiguration.SectionName))
-           .ValidateDataAnnotations();
-
         services.AddScoped<IDoorService, DoorService>();
 
         services.TryAddTransient<ApiAuthorizationMessageHandler>();
@@ -24,7 +20,7 @@ public static class DoorServiceExtensions
         {
             var configuration = provider.GetRequiredService<IOptions<ApiConfiguration>>().Value;
 
-            options.BaseAddress = new Uri($"{configuration.BaseUrl}/doorrequest/");
+            options.BaseAddress = new Uri($"{configuration.BaseUrl}/api/doorrequest/");
         }).AddHttpMessageHandler<ApiAuthorizationMessageHandler>();
     }
 }

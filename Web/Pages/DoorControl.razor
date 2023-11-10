@@ -4,11 +4,9 @@
 @using Web.Services;
 @using global::Shared.Authorization;
 
-@implements IDisposable;
-
 @inject IDoorService DoorService;
 @inject ISnackbar Snackbar;
-@inject IJSRuntime JsRuntime;
+@inject IConnectionStatusService ConnectionStatusService;
 
 @attribute [Authorize(Roles = Roles.TwentyFourSevenAccess)]
 
@@ -34,13 +32,13 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                @if (KeyVaultCode is null)
+                @if (KeyVaultCode is not null)
                 {
-                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                    <MudText>@KeyVaultCode</MudText>
                 }
                 else
                 {
-                    <MudText>@KeyVaultCode</MudText>
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
                 }
             </MudCardContent>
         </MudCard>
@@ -51,7 +49,8 @@
     private int? KeyVaultCode { get; set; }
 
     private bool OpeningDoor;
-    private bool IsOnline;
+
+    private bool IsOnline => ConnectionStatusService.ApiReachable;
 
     public async Task OpenDoor()
     {
@@ -63,32 +62,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        KeyVaultCode = await DoorService.GetCode(CancellationToken.None);
-    }
-
-    [JSInvokable("Connection.StatusChanged")]
-    public void OnConnectionStatusChanged(bool isOnline)
-    {
-        if (IsOnline != isOnline)
+        ConnectionStatusService.AddOnDisconnectedAction((ct) =>
         {
-            IsOnline = isOnline;
-        }
+            Snackbar.Clear();
+            Snackbar.Add("Can not connect to API service", Severity.Error);
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
 
-        if (!IsOnline)
-            Snackbar.Add("Lost network connection", Severity.Error);
-
-        StateHasChanged();
-    }
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        JsRuntime.InvokeVoidAsync("Connection.Initialize", DotNetObjectReference.Create(this));
-    }
-
-    public void Dispose()
-    {
-        JsRuntime.InvokeVoidAsync("Connection.Dispose");
+        ConnectionStatusService.AddOnConnectedAction((ct) =>
+        {
+            Snackbar.Clear();
+            Snackbar.Add("API Service reachable", Severity.Success);
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+        KeyVaultCode = await DoorService.GetCode(CancellationToken.None);
     }
 }
