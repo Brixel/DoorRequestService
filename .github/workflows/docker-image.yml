@@ -1,7 +1,7 @@
 name: Publish
 on:
   push:
-    branches: [master]
+    branches: [master, blazor-webapp]
 
 env:
   REGISTRY: ghcr.io
@@ -34,14 +34,25 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/brixel/door-request-api
+          images: |
+            ${{ env.REGISTRY }}/brixel/door-request-api
+            ${{ env.REGISTRY }}/brixel/door-request-web
           tags: type=semver,pattern={{version}},value=${{ steps.gitversion.outputs.semVer }}
-      - name: Build and push
-        id: docker_build
+      - name: Build and push API
+        id: docker_build_api
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           file: API/DoorRequest.API/Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push Web
+        id: docker_build_web
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          file: Web/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
