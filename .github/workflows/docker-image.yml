@@ -1,10 +1,11 @@
 name: Publish
 on:
   push:
-    branches: [master, blazor-webapp]
+    branches: [master]
 
 jobs:
   publish:
+    name: Publish ${{ matrix.image }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
