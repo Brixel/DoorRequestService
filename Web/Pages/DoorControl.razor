@@ -1,0 +1,82 @@
+﻿@page "/"
+
+@using Microsoft.AspNetCore.Authorization;
+@using Web.Services;
+@using global::Shared.Authorization;
+
+@inject IDoorService DoorService;
+@inject ISnackbar Snackbar;
+@inject IConnectionStatusService ConnectionStatusService;
+
+@attribute [Authorize(Roles = Roles.TwentyFourSevenAccess)]
+
+<div class="mb-2">
+    <MudButton Disabled="OpeningDoor || !IsOnline" Variant="Variant.Filled" Size="Size.Large" Color="Color.Primary" FullWidth="true" @onclick="OpenDoor">
+        @if (OpeningDoor)
+        {
+            <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+            <MudText>Opening door...</MudText>
+        }
+        else
+        {
+            <MudText>Buzz me in!</MudText>
+        }
+    </MudButton>
+</div>
+<div>
+    <AuthorizeView Roles="@Roles.KeyVaultCodeAccess">
+        <MudCard Outlined="true">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Key vault code</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (KeyVaultCode is not null)
+                {
+                    <MudText>@KeyVaultCode</MudText>
+                }
+                else
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                }
+            </MudCardContent>
+        </MudCard>
+    </AuthorizeView>
+</div>
+
+@code {
+    private int? KeyVaultCode { get; set; }
+
+    private bool OpeningDoor;
+
+    private bool IsOnline => ConnectionStatusService.ApiReachable;
+
+    public async Task OpenDoor()
+    {
+        OpeningDoor = true;
+        await DoorService.OpenDoor(CancellationToken.None);
+        Snackbar.Add("Door buzzer triggered successfully!", Severity.Success);
+        OpeningDoor = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ConnectionStatusService.AddOnDisconnectedAction((ct) =>
+        {
+            Snackbar.Clear();
+            Snackbar.Add("Can not connect to API service", Severity.Error);
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+
+        ConnectionStatusService.AddOnConnectedAction((ct) =>
+        {
+            Snackbar.Clear();
+            Snackbar.Add("API Service reachable", Severity.Success);
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+        KeyVaultCode = await DoorService.GetCode(CancellationToken.None);
+    }
+}

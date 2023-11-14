@@ -1,9 +1,13 @@
-﻿using DoorRequest.API.Config;
+﻿using System.Threading.Tasks;
+
+using DoorRequest.API.Config;
 using DoorRequest.API.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
+
+using Shared.Authorization;
 
 namespace DoorRequest.API.Controllers;
 
@@ -22,14 +26,14 @@ public class DoorRequestController : ControllerBase
     }
 
     [HttpPost("open")]
-    [Authorize(Roles = Authorization.Roles.TwentyFourSevenAccess)]
+    [Authorize(Roles = Roles.TwentyFourSevenAccess)]
     public async Task<bool> OpenDoorRequest()
     {
         return await _doorService.OpenDoor();
     }
 
     [HttpGet("code")]
-    [Authorize(Roles = Authorization.Roles.KeyVaultCodeAccess)]
+    [Authorize(Roles = Roles.KeyVaultCodeAccess)]
     public int GetLockCode()
     {
         return _lockConfiguration.Code;

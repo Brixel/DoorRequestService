@@ -1,6 +1,9 @@
-﻿using DoorRequest.API.Authorization;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+
 using DoorRequest.API.Config;
 using DoorRequest.API.Services;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -9,10 +12,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+
 using Serilog;
 using Serilog.Events;
-using System;
-using System.IdentityModel.Tokens.Jwt;
+
+using Shared.Authorization;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -33,6 +37,7 @@ try
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddControllers();
+    builder.Services.AddHealthChecks();
 
     var authOptions = builder.Configuration.GetSection(AuthenticationConfiguration.SectionName).Get<AuthenticationConfiguration>();
 
@@ -68,15 +73,6 @@ try
             .Build();
     });
 
-    builder.Services.AddCors(options =>
-    {
-        //TODO: Fix CORS
-        options.AddPolicy("CorsPolicy", builder =>
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-    });
-
     builder.Services.AddOptions<DoorConfiguration>()
         .Bind(builder.Configuration.GetSection(DoorConfiguration.SectionName))
         .ValidateDataAnnotations()
@@ -95,12 +91,17 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseCors("CorsPolicy");
+    app.UseCors(builder =>
+        //TODO: Fix CORS
+        builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
     app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapHealthChecks("/healthz");
 
     app.Run();
 }
