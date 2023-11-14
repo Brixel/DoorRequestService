@@ -2,7 +2,7 @@
 
 namespace DoorRequest.API.Services;
 
-public interface IDoorRequestService
+public interface IDoorService
 {
     Task<bool> OpenDoor();
 }
