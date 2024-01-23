@@ -7,9 +7,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +38,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: WebApp/doorrequest
           push: true
           file: WebApp/doorrequest/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
