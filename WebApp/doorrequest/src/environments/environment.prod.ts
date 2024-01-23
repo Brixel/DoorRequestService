@@ -4,5 +4,6 @@ export const environment = {
   oAuth: {
     issuer: "",
     clientId: "",
+    requireHttps: false,
   },
 };
