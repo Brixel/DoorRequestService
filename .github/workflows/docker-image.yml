@@ -3,15 +3,21 @@ on:
   push:
     branches: [master]
 
-env:
-  REGISTRY: ghcr.io
-
 jobs:
   publish:
+    name: Publish ${{ matrix.image }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./API/DoorRequest.API/Dockerfile
+            image: ghcr.io/brixel/door-request-api
+          - dockerfile: ./Web/Dockerfile
+            image: ghcr.io/brixel/door-request-web
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,7 +26,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install GitVersion
@@ -34,14 +40,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/brixel/door-request-api
+          images: ${{ matrix.image }}
           tags: type=semver,pattern={{version}},value=${{ steps.gitversion.outputs.semVer }}
-      - name: Build and push
-        id: docker_build
+      - name: Build and push docker image
+        id: docker_build_api
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          file: API/DoorRequest.API/Dockerfile
+          file: ${{ matrix.dockerfile }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

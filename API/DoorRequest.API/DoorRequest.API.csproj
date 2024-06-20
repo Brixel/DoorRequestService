@@ -22,6 +22,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />  
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\Shared.csproj" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="jlgkcxgvknbm v,nmzl ,mznoo534oi5powsjddmg;dms" /></VisualStudio></ProjectExtensions>
 
 </Project>
